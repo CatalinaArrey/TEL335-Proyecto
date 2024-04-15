@@ -17,27 +17,23 @@ router.post("/user", async (ctx) => {
 });
 
 router.get("/user", async (ctx) => {
-  ctx.body = users; 
+  ctx.body = users;
 });
 
 router.post("/login", async (ctx) => {
-  for (let i = 0; i < users.length; i++) {
+  users.forEach((user) => {
     if (
-      users[i].email === ctx.request.body.email &&
-      users[i].password === ctx.request.body.password
+      user.email === ctx.request.body.email &&
+      user.password === ctx.request.body.password
     ) {
       ctx.body = "beinvenido";
-      break;
+      return;
     } else {
       ctx.body = "fuera";
     }
-  }
+  });
 });
 
 app.use(router.routes());
-
-// app.use(async ctx => {
-//   ctx.body = 'Hello World';
-// });
 
 app.listen(3000);
