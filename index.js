@@ -17,7 +17,7 @@ router.post("/user", async (ctx) => {
 });
 
 router.get("/user", async (ctx) => {
-  ctx.body = users;
+  ctx.body = users; 
 });
 
 router.post("/login", async (ctx) => {
