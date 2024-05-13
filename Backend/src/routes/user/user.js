@@ -1,24 +1,20 @@
-let users = [];
+import userActions from '../../actions/user/user'
 
-exports.createUser =  (ctx) => {
-  users.push(ctx.request.body);
-  ctx.body = "listo";
+
+exports.register =  (ctx) => {
+  // parametros: name, email, password
+  let newUser = userActions.createUser(ctx.request.body)
+
+  ctx.body = {
+    status: "OK",
+    user: newUser
+  };
 };
 
 exports.getUsers = (ctx) => {
-  ctx.body = users;
+  ctx.body = userActions.getAllUsers()
 };
 
 exports.login = (ctx) => {
-  users.forEach((user) => {
-    if (
-      user.email === ctx.request.body.email &&
-      user.password === ctx.request.body.password
-    ) {
-      ctx.body = "beinvenido";
-      return;
-    } else {
-      ctx.body = "fuera";
-    }
-  });
+  ctx.body = userActions.loginUser(ctx.request.body)
 };

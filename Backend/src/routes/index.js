@@ -1,9 +1,13 @@
-import Router from "koa-router";
-import user from "./user/user"
+import Router from 'koa-router'
+import getHealth from './health/health'
+import user from './user/user'
 
-const router = new Router();
+const router = new Router()
 
-router.post("/user", user.createUser);
+router.get('/health', getHealth)
+
+
+router.post("/user", user.register);
 
 router.get("/user", user.getUsers);
 
