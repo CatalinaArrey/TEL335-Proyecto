@@ -1,12 +1,15 @@
-let users = [];
+const users = [];
 let id = 1;
+
+let currentUser = 0
 
 exports.createUser = (userData) => {
   let newUser = {
     id: id++,
-    name: userData.name,
+    username: userData.username,
     email: userData.email,
     password: userData.password,
+    phone: userData.phone
   };
 
   users.push(newUser);
@@ -24,14 +27,19 @@ exports.loginUser = (data) => {
       user.email === data.email &&
       user.password === data.password
     ) {
-      msg = "bienvenido";
+      currentUser = user.id
+      msg = `Welcome ${user.username}`;
       return
     } else {
-      msg = "fuera";
+      msg = "Wrong email or password";
     }
   });
-  msg = 'hola'
-  console.log(msg)
   return msg
 
+}
+
+exports.logoutUser = () => {
+  currentUser = 0
+  let msg = "Logged out successfully"
+  return msg
 }
