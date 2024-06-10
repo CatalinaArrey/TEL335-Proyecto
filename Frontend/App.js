@@ -19,27 +19,27 @@ export default function App() {
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
-          }}>
-          <Stack.Screen name="Calendar" component={Calendario} />
+          }}
+        >
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Signup" component={Signup} />
           <Stack.Screen name="Register Pet" component={RegisterPet} />
+          <Stack.Screen name="Calendar" component={Calendario} />
           <Stack.Screen
             name="Home"
             component={Home}
-            options={
-              {
-                title: "Mis Mascotas",
-                headerTitleAlign: "center",
-                headerStyle: {
-                  backgroundColor: "#fff",
-                },
-                headerTintColor: "#000",
-                headerTitleStyle: {
-                  fontWeight: "bold",
-                },
-              }}
-            />
+            options={{
+              title: "Mis Mascotas",
+              headerTitleAlign: "center",
+              headerStyle: {
+                backgroundColor: "#fff",
+              },
+              headerTintColor: "#000",
+              headerTitleStyle: {
+                fontWeight: "bold",
+              },
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

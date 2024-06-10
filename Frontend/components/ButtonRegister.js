@@ -1,11 +1,25 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import axios from "axios";
 
 
-export default function ButtonRegister() {
+export default function ButtonRegister(props) {
+
+    const handleRegister = () => {
+        const data = props.data
+        axios
+          .post("http://172.20.10.2:3000/user", data)
+          .then((response) => {
+            console.log(response.data);
+          })
+          .catch((error) => {
+            console.error("Error sending data: ", error);
+          });
+    }
+
     return (
-        <TouchableOpacity style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress={handleRegister}>
             <LinearGradient
                 colors={['#5DADE2', '#A3E4D7']}
                 start={{ x: 0, y: 0 }}
