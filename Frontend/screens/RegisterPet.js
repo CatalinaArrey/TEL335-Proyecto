@@ -1,10 +1,9 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput } from 'react-native';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import ButtonRegister from '../components/Register/ButtonRegister'
 
-import ButtonRegister from '../components/ButtonRegister'
-import { useNavigation } from '@react-navigation/native';
 
 
 const RegisterPet = () =>{
@@ -53,7 +52,7 @@ const RegisterPet = () =>{
 
 }
 
-export default RegisterPet
+export default RegisterPet;
 
 const styles = StyleSheet.create({
     container: {
