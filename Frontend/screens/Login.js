@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
-import ButtonLogin from '../components/ButtonLogin'
+import ButtonLogin from '../components/Login/ButtonLogin'
 import { useNavigation } from '@react-navigation/native';
 
 
@@ -14,7 +14,7 @@ export default function Login() {
 
     };
     const handleEnter =() =>{
-        navigation.navigate("Home")
+        navigation.navigate("Pets")
     };
 
     return (
