@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -14,6 +14,18 @@ export default function Register() {
         navigation.navigate("Login")
     };
 
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+
+    const newUser = {
+        username,
+        password,
+        email,
+        phone
+    }
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Crea tu cuenta</Text>
@@ -23,6 +35,8 @@ export default function Register() {
                 <TextInput
                     placeholder="Username"
                     style={styles.textInput}
+                    value={username}
+                    onChange={e => setUsername(e.nativeEvent.text)}
                 />
             </View>
 
@@ -32,6 +46,8 @@ export default function Register() {
                 placeholder="Contraseña"
                 style={styles.textInput}
                 secureTextEntry={true}
+                value={password}
+                onChange={e => setPassword(e.nativeEvent.text)}
             />
             </View>
 
@@ -40,6 +56,8 @@ export default function Register() {
                 <TextInput
                     placeholder="Correo Electrónico"
                     style={styles.textInput}
+                    value={email}
+                    onChange={e => setEmail(e.nativeEvent.text)}
                 />
             </View>
             
@@ -48,10 +66,12 @@ export default function Register() {
                 <TextInput
                     placeholder="Teléfono"
                     style={styles.textInput}
+                    value={phone}
+                    onChange={e => setPhone(e.nativeEvent.text)}
                 />
             </View>
 
-            <ButtonRegister />
+            <ButtonRegister data = {newUser}/>
             <Text style={styles.subtitle}>O crea tu cuenta con </Text>
             <TouchableOpacity onPress={handleLogin}>
             <Text style={styles.login}>¿Ya tienes cuenta? Ingresa</Text>
