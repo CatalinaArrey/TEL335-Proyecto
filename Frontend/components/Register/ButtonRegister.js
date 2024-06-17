@@ -6,16 +6,15 @@ import axios from "axios";
 
 export default function ButtonRegister(props) {
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         const data = props.data
-        axios
-          .post("http://172.20.10.2:3000/user", data)
-          .then((response) => {
+        axios.post("http://172.20.10.2:3000/user", data)
+        .then((response) => {
             console.log(response.data);
-          })
-          .catch((error) => {
+        })
+        .catch((error) => {
             console.error("Error sending data: ", error);
-          });
+        });
     }
 
     return (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -17,6 +17,14 @@ export default function Login() {
         navigation.navigate("Pets")
     };
 
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+
+    const loginData = {
+        username,
+        password
+    }
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>¡Hola!</Text>
@@ -26,6 +34,8 @@ export default function Login() {
                 <TextInput
                     placeholder="Username"
                     style={styles.textInput}
+                    value={username}
+                    onChange={e => setUsername(e.nativeEvent.text)}
                 />
             </View>
             <View style={styles.inputContainer}>
@@ -34,12 +44,14 @@ export default function Login() {
                 placeholder="Contraseña"
                 style={styles.textInput}
                 secureTextEntry={true}
+                value={password}
+                onChange={e => setPassword(e.nativeEvent.text)}
             />
             </View>
             <TouchableOpacity onPress={handleEnter}>
             <Text style={styles.links}>¿Olvidaste tu contraseña?</Text>
             </TouchableOpacity>
-            <ButtonLogin />
+            <ButtonLogin data={loginData} />
             <TouchableOpacity onPress={handleRegister}>
             <Text style={styles.footerText}>¿Aún no tienes cuenta? <Text style={styles.links}>Registrate</Text></Text>
             </TouchableOpacity>
