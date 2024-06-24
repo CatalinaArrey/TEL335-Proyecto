@@ -2,19 +2,31 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from "axios";
-
+import { useNavigation } from '@react-navigation/native';
 
 export default function ButtonLogin(props) {
 
+    const navigation = useNavigation();
     const handleLogin = () => {
-        const data = props.data
-        console.log(data)
-        axios.post("http://10.112.1.45:3000/login", data)
+        const data = props.data;
+        if (!data) {
+            console.error("No se recibieron datos para iniciar sesión");
+            return;
+        }
+        axios.post("http://192.168.1.89:3000/login", data)
           .then((response) => {
+            console.log("LOG ", props.data);
             console.log(response.data);
+            
+            // Verifica la respuesta del servidor
+            if (response.data.status === 'OK') {
+                navigation.navigate('Navigation');
+            } else {
+                console.log("Inicio de sesión fallido: ", response.data.msg);
+            }
           })
           .catch((error) => {
-            console.error("Error sending data: ", error);
+            console.error("ERROR ", error.response.data);
           });
     }
 

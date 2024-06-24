@@ -24,14 +24,14 @@ exports.loginUser = (data) => {
   let msg;
   users.forEach((user) => {
     if (
-      user.email === data.email &&
+      user.username === data.username &&
       user.password === data.password
     ) {
       currentUser = user.id
       msg = `Welcome ${user.username}`;
       return
     } else {
-      msg = "Wrong email or password";
+      msg = "Wrong user or password";
     }
   });
   return msg

@@ -4,17 +4,34 @@ import { LinearGradient } from 'expo-linear-gradient';
 import axios from "axios";
 
 
-export default function ButtonRegister(props) {
-
+export default function ButtonRegister({ data, onSuccess }) {
     const handleRegister = async () => {
-        const data = props.data
-        axios.post("http://172.20.10.2:3000/user", data)
-        .then((response) => {
-            console.log(response.data);
-        })
-        .catch((error) => {
+        try {
+            const response = await axios.post("http://192.168.1.89:3000/user", data);
+            if (response.status === 200) {
+                console.log(response.data);
+                onSuccess();
+            } else {
+                console.error("Unexpected response: ", response);
+                Alert.alert("Error", "Unexpected response from server. Please try again.");
+            }
+        } catch (error) {
             console.error("Error sending data: ", error);
-        });
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                console.error("Error response data: ", error.response.data);
+                Alert.alert("Error", `Server responded with status code ${error.response.status}: ${error.response.data.message || 'Unknown error'}`);
+            } else if (error.request) {
+                // The request was made but no response was received
+                console.error("Error request: ", error.request);
+                Alert.alert("Error", "No response from server. Please check your network connection.");
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                console.error("Error message: ", error.message);
+                Alert.alert("Error", `Error in request setup: ${error.message}`);
+            }
+        }
     }
 
     return (

@@ -83,7 +83,7 @@ exports.getUsers = (ctx) => {
 
 exports.login = (ctx) => {
   try {
-    const params = ["email", "password"]
+    const params = ["username", "password"]
     const data = ctx.request.body
 
     let error = 0;
