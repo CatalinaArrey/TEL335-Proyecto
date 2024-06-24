@@ -24,7 +24,7 @@ exports.loginUser = (data) => {
   let msg;
   users.forEach((user) => {
     if (
-      user.email === data.email &&
+      user.username === data.username &&
       user.password === data.password
     ) {
       currentUser = user.id
