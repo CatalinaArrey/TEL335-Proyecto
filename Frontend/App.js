@@ -10,7 +10,8 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <Navigation/>
+        <Login />
+        {/* <Navigation/> */}
       </NavigationContainer>
     </SafeAreaProvider>
   );
