@@ -2,8 +2,8 @@ import React from 'react';
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { createStackNavigator } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import Calendario from '../screens/Calendars';
 import Pets from "../screens/Pets";
@@ -15,19 +15,19 @@ import Settings from '../screens/Settings';
 
 const Tab = createMaterialBottomTabNavigator();
 const Drawer = createDrawerNavigator();
-const PetStackNavigator = createStackNavigator();
+const PetStackNavigator = createNativeStackNavigator();
 
-function MyStack() {
+function PetsStack() {
     return (
-        <PetStackNavigator.Navigator initialRouteName="PetsView" screenOptions={{ headerShown: false }}>
-            <PetStackNavigator.Screen name="PetsView" component={Pets} />
+        <PetStackNavigator.Navigator initialRouteName="PetsStack" screenOptions={{ headerShown: false }}>
+            <PetStackNavigator.Screen name="PetsStack" component={Pets} />
             <PetStackNavigator.Screen name="PetStack" component={PetStack} />
             <PetStackNavigator.Screen name="RegisterPet" component={RegisterPet} />
         </PetStackNavigator.Navigator>
     )
 }
 
-function MyTabs() {
+function TabNavigator() {
     return (
         <Tab.Navigator
             tabBarActivateBackgroundColor="#fff"
@@ -36,17 +36,17 @@ function MyTabs() {
             style={{ flex: 1 }}
         >
             <Tab.Screen
-                name="Mascotas"
-                component={MyStack}
+                name="PetsTab"
+                component={PetsStack}
                 options={{
-                    tabBarLabel: "Mascotas",
+                    tabBarLabel: "Pets",
                     tabBarIcon: () => (
                         <MaterialCommunityIcons name="paw" color="#000" size={24} />
                     )
                 }}
             />
             <Tab.Screen
-                name="Calendario"
+                name="CalendarioTab"
                 component={Calendario}
                 options={{
                     tabBarLabel: "Calendario",
@@ -59,25 +59,22 @@ function MyTabs() {
     );
 }
 
-export default function Navigation() {
+function NavigationDrawer() {
     return (
-
-        <Drawer.Navigator initialRouteName="PetsView" screenOptions={{ headerShown: false }}>
-            <Drawer.Screen name="Home" component={HomeScreen} />
+        <Drawer.Navigator initialRouteName="PetsDrawer" screenOptions={{ headerShown: false }}>
+            <Drawer.Screen name="PetsDrawer" component={PetsStack} />
             <Drawer.Screen name="Profile" component={Profile} />
             <Drawer.Screen name="Ajustes" component={Settings} />
         </Drawer.Navigator>
-
     );
 }
 
-function HomeScreen({ navigation }) {
+export default function Navigation() {
     const insets = useSafeAreaInsets();
     return (
         <React.Fragment>
-            <TopBar navigation={navigation} />
-            <MyTabs contentContainerStyle={{ paddingTop: insets.top }} />
+            <TopBar />
+            <TabNavigator contentContainerStyle={{ paddingTop: insets.top }} />
         </React.Fragment>
     );
 }
-

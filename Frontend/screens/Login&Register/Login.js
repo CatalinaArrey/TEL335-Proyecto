@@ -3,18 +3,21 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
-import ButtonLogin from '../components/Login/ButtonLogin'
+import ButtonLogin from '../../components/Login/ButtonLogin'
 import { useNavigation } from '@react-navigation/native';
 
 
 export default function Login() {
     const navigation = useNavigation();
-    const handleRegister =() =>{
-        navigation.navigate("Signup")
-
-    };
+    
     const handleEnter =() =>{
-        navigation.navigate("Pets")
+        const response = { status: 'OK' }
+        if (response.status === 'OK') {
+
+            navigation.navigate('Navigation'); 
+        } else {
+            console.log('Credenciales incorrectas');
+        }
     };
 
     const [username, setUsername] = useState("")
@@ -35,7 +38,7 @@ export default function Login() {
                     placeholder="Username"
                     style={styles.textInput}
                     value={username}
-                    onChange={e => setUsername(e.nativeEvent.text)}
+                    onChangeText={text => setUsername(text)}
                 />
             </View>
             <View style={styles.inputContainer}>
@@ -45,14 +48,17 @@ export default function Login() {
                 style={styles.textInput}
                 secureTextEntry={true}
                 value={password}
-                onChange={e => setPassword(e.nativeEvent.text)}
+                onChangeText={text => setPassword(text)}
             />
             </View>
             <TouchableOpacity onPress={handleEnter}>
             <Text style={styles.links}>¿Olvidaste tu contraseña?</Text>
             </TouchableOpacity>
-            <ButtonLogin data={loginData} />
-            <TouchableOpacity onPress={handleRegister}>
+            <ButtonLogin data={loginData}/>
+            <TouchableOpacity 
+                onPress={()=>{
+                    navigation.navigate('Signup'); 
+                }}>
             <Text style={styles.footerText}>¿Aún no tienes cuenta? <Text style={styles.links}>Registrate</Text></Text>
             </TouchableOpacity>
     

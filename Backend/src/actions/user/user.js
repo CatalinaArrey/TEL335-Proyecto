@@ -31,7 +31,7 @@ exports.loginUser = (data) => {
       msg = `Welcome ${user.username}`;
       return
     } else {
-      msg = "Wrong email or password";
+      msg = "Wrong user or password";
     }
   });
   return msg
