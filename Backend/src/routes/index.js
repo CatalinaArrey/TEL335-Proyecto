@@ -18,7 +18,7 @@ router.post("/pets", pets.register)
 router.get("/pets/:userId", pets.getPetsByUser)
 
 router.get("/appointments/:petId", appointments.getAppointmentsByPet)
-router.post("/appintments/:petId", appointments.createAppointment)
+router.post("/appointments/:petId", appointments.createAppointment)
 router.put("/appointments/:appointmentId", appointments.updateAppointment)
 
 export default router
