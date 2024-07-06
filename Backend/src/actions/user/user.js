@@ -1,69 +1,61 @@
+import bcrypt from "bcrypt";
+
 const users = [];
 let id = 1;
 
-let currentUser = 0
 
-exports.createUser = (userData) => {
-  try{
+const getAllUsers = () => {
+  try {
+    return users;
+  } catch (error) {
+    console.error("Error retrieving users:", error);
+    throw new Error("Error retrieving user from db");
+  }
+};
+
+const createUser = async (userData) => {
+  try {
+    // Verificar que el nombre de usuario y correo no esten en uso
+    const users = getAllUsers();
+    users.forEach((usr) => {
+      if (userData.username.toLowerCase() === usr.username) {
+        throw new Error("Username is already in use");
+      }
+      if (userData.email.toLowerCase() === usr.email) {
+        throw new Error("Email is already in use");
+      }
+    });
+
+    const hash = await bcrypt.hash(userData.password, 10);
     let newUser = {
       id: id++,
       username: userData.username.toLowerCase(),
       email: userData.email.toLowerCase(),
-      password: userData.password,
+      password: hash,
       phone: userData.phone,
     };
 
     users.push(newUser);
-    return newUser
-  }
-  catch (error) {
-    console.error('Error trying to create user:', error)
-    throw new Error('Error registering user to db')
+  } catch (error) {
+    if (error.message === "Username is already in use" || error.message === "Email is already in use") throw error
+    else {
+      console.error("Error trying to create user:", error);
+      throw new Error("Error registering user to db");
+    }
   }
 };
 
-exports.getAllUsers = () => {
-  try{
-    return users
+const clearUsers = () => {
+  try {
+    users.length = 0;
+  } catch (error) {
+    console.error("Error in clearing users:", error);
+    throw new Error("Error in clearing users");
   }
-  catch (error) {
-    console.error("Error retrieving users:", error);
-    throw new Error("Error retrieving user from db");
-  }
-}
+};
 
-exports.loginUser = (data) => {
-  try{
-    let loginStatus = 0
-    users.some((user) => {
-      if (
-        user.username === data.username.toLowerCase() &&
-        user.password === data.password
-      ) {
-        currentUser = user.id;
-        loginStatus = 1;
-        return true;
-      } 
-      return false
-    });
-    return loginStatus;
-  }
-  catch (error) {
-    console.error("Error in login:", error);
-    throw new Error("Error in login");
-  }
-
-}
-
-exports.logoutUser = () => {
-  try{
-    let loginStatus = 1
-    currentUser = 0;
-    loginStatus = 0;
-    return loginStatus;
-  }
-  catch (error) {
-    console.error("Error in logout:", error);
-    throw new Error("Error in logout");
-  }
-}
+module.exports = {
+  getAllUsers,
+  createUser,
+  clearUsers,
+};
