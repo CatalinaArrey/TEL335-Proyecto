@@ -8,6 +8,8 @@ const port = 3000
 app.use(bodyParser({ multipart: true, urlencoded: true }))
 app.use(router.routes())
 
-app.listen(3000, () => {
+const server = app.listen(port, () => {
     console.log(`Server is running on port ${port}`)
 })
+
+export { server, app }
