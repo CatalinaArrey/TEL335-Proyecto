@@ -21,7 +21,7 @@ router.post("/auth/logout", auth.logout);
 
 router.post("/pets/:userId", pets.register);
 router.get("/pets/:userId", pets.getPetsByUser)
-router.delete("/pets/:userId/:petId", pets.deletePet);
+router.delete("/pets/:petId", pets.deletePet);
 
 router.get("/appointments/:petId", appointments.getAppointmentsByPet)
 router.post("/appointments/:petId", appointments.createAppointment)

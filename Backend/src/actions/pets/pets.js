@@ -1,5 +1,6 @@
 import userActions from '../user/user'
-import {petModel} from '../../models/pets/pet.model'
+import Pet from '../../models/pets/pet.model'
+import User from '../../models/user/user.model'
 
 
 exports.createPet = async (petData, ownerId) => {
@@ -7,14 +8,15 @@ exports.createPet = async (petData, ownerId) => {
     const user = await userActions.getUserById(ownerId)
     if (!user) throw new Error("User not found");
 
-    const newPet = {
+    const pet = new Pet({
       name: petData.name,
       species: petData.species,
       breed: petData.breed,
       birthday: petData.birthday
-    };
+    })
+    const newPet = await pet.save()
 
-    user.pets.push(newPet);
+    user.pets.push(newPet._id);
     await user.save()
     return newPet;
   }
@@ -29,7 +31,7 @@ exports.createPet = async (petData, ownerId) => {
 
 exports.listPetsByUser = async (ownerId) => {
   try {
-    const user = await userActions.getUserById(ownerId)
+    const user = await User.findById(ownerId).populate("pets").exec()
     if (!user) throw new Error("User not found");
 
     const pets = user.pets
@@ -43,18 +45,23 @@ exports.listPetsByUser = async (ownerId) => {
   }
 }
 
-exports.removePet = async (ownerId, petId) => {
+exports.removePet = async (petId) => {
   try {
-    const user = await userActions.getUserById(ownerId);
-    if (!user) throw new Error("User not found");
+    const user = await User.findOneAndUpdate(
+      { pets: petId },
+      { $pull: { pets: petId } },
+      { new: true }
+    ).exec()
+    if (!user) throw new Error("Pet not found");
 
-    const pet = user.pets.id(petId)
+    const pet = await Pet.findById(petId);
     if (!pet) throw new Error("Pet not found");
 
-    user.pets.pull({ _id: petId });
-    await user.save();
+    await pet.deleteOne({
+      _id: pet._id,
+    });
   } catch (error) {
-    if (error.message === "Pet not found" || error.message === "User not found")
+    if (error.message === "Pet not found")
       throw error;
     else {
       console.error("Error trying to delete pet:", error);

@@ -11,9 +11,4 @@ const petSchema = new mongoose.Schema({
   appointments: { type: [mongoose.SchemaTypes.ObjectId], default: [] }
 });
 
-const petModel = mongoose.model("Pet", petSchema);
-
-module.exports = {
-  petSchema,
-  petModel,
-};
+module.exports = mongoose.model("Pet", petSchema);

@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import {petSchema} from "../pets/pet.model"
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -19,7 +18,7 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   phone: String,
-  pets: { type: [petSchema], default: [] },
+  pets: { type: [{type: mongoose.SchemaTypes.ObjectId, ref: 'Pet'}], default: [] }
 });
 
 module.exports = mongoose.model("User", userSchema);

@@ -75,9 +75,8 @@ exports.getPetsByUser = async (ctx) => {
 
 exports.deletePet = async (ctx) => {
   try {
-    const userId = ctx.request.params.userId;
     const petId = ctx.request.params.petId;
-    await petActions.removePet(userId, petId);
+    await petActions.removePet(petId);
     ctx.body = {
       status: "OK",
       msg: "Pet was successfully removed",
