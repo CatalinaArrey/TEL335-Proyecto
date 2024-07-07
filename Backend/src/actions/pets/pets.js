@@ -3,9 +3,9 @@ import Pet from '../../models/pets/pet.model'
 import User from '../../models/user/user.model'
 
 
-exports.createPet = async (petData, ownerId) => {
+const createPet = async (petData, ownerId) => {
   try {
-    const user = await userActions.getUserById(ownerId)
+    const user = await userActions.findUserById(ownerId);
     if (!user) throw new Error("User not found");
 
     const pet = new Pet({
@@ -29,7 +29,7 @@ exports.createPet = async (petData, ownerId) => {
   }
 }
 
-exports.listPetsByUser = async (ownerId) => {
+const listPetsByUser = async (ownerId) => {
   try {
     const user = await User.findById(ownerId).populate("pets").exec()
     if (!user) throw new Error("User not found");
@@ -45,7 +45,7 @@ exports.listPetsByUser = async (ownerId) => {
   }
 }
 
-exports.removePet = async (petId) => {
+const removePet = async (petId) => {
   try {
     const user = await User.findOneAndUpdate(
       { pets: petId },
@@ -54,7 +54,7 @@ exports.removePet = async (petId) => {
     ).exec()
     if (!user) throw new Error("Pet not found");
 
-    const pet = await Pet.findById(petId);
+    const pet = await findPetById(petId);
     if (!pet) throw new Error("Pet not found");
 
     await pet.deleteOne({
@@ -69,3 +69,24 @@ exports.removePet = async (petId) => {
     }
   }
 }
+
+const findPetById = async (petId) => {
+  try {
+    let pet;
+    if (!petId.match(/^[0-9a-fA-F]{24}$/)) {
+      return pet;
+    }
+    pet = await Pet.findById(petId);
+    return pet;
+  } catch (error) {
+    console.error("Error searching for pet:", error);
+    throw new Error("Error searching for pet in db");
+  }
+};
+
+module.exports = {
+  createPet,
+  listPetsByUser,
+  removePet,
+  findPetById,
+};

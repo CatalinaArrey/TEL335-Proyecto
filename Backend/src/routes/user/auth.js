@@ -20,7 +20,7 @@ exports.authenticateToken = async (ctx, next) => {
   }
 };
 
-exports.token = (ctx) => {
+exports.token = async (ctx) => {
   try {
     const refreshToken = ctx.request.body.token;
     if (refreshToken == null) {
@@ -28,7 +28,7 @@ exports.token = (ctx) => {
       return ctx;
     }
 
-    const newToken = authActions.refreshAccessToken(refreshToken);
+    const newToken = await authActions.refreshAccessToken(refreshToken);
 
     if (!newToken) {
       ctx.status = 403;
@@ -52,32 +52,12 @@ exports.token = (ctx) => {
 
 exports.login = async (ctx) => {
   try {
-    const params = ["identifier", "password"];
-    const data = ctx.request.body;
+    const { identifier, password } = ctx.request.body
+    if (!identifier) throw new Error("Missing username/email");
+    if (!password) throw new Error("Missing password");
 
-    let error = 0;
-    let error_msg = "";
-
-    params.forEach((key) => {
-      let value = data[key];
-
-      if (!value) {
-        error_msg = `${key} is missing`;
-        error = 1;
-        return;
-      }
-    });
-
-    if (error) {
-      ctx.body = {
-        status: "NOK",
-        error_msg,
-      };
-      ctx.status = 400;
-      return ctx;
-    }
-
-    const tokens = await authActions.loginUser(ctx.request.body);
+    const userData = { identifier, password };
+    const tokens = await authActions.loginUser(userData);
 
     if (tokens !== -1) {
       ctx.body = {

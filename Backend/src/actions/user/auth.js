@@ -1,18 +1,34 @@
 import dotenv from "dotenv";
 import bcrypt from 'bcrypt'
 import jwt from "jsonwebtoken";
-import user from './user'
+import User from '../../models/user/user.model'
+import Token from '../../models/token/token.model'
 
 dotenv.config();
-let refreshTokens = [];
 
 const generateAccessToken = (user) => {
-  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20s' });
+  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30m' });
 };
+
+const generateRefreshToken = (user) => {
+  const token = jwt.sign(
+    { id: user.id, username: user.username },
+    process.env.REFRESH_TOKEN_SECRET
+  );
+  const refreshToken = new Token({
+    token,
+    userId: user.id,
+  });
+  refreshToken.save();
+  return token
+}
 
 exports.refreshAccessToken = (token) => {
   try {
-    if (!refreshTokens.includes(token)) return null
+    const refreshToken = Token.findOne({
+      token: token,
+    });
+    if (!refreshToken) return null;
     const user = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
     const accessToken = generateAccessToken({
       id: user.id,
@@ -24,50 +40,43 @@ exports.refreshAccessToken = (token) => {
   }
 }
 
-exports.loginUser = (data) => {
+exports.loginUser = async (data) => {
   try {
-    let currentUser = {};
-
-    const users = user.getAllUsers()
-    // Autenticación
-    users.some(async (user) => {
-      if (
-        user.email === data.identifier.toLowerCase() ||
-        user.username === data.identifier.toLowerCase()
-      ) {
-        const isMatch = await bcrypt.compare(data.password, user.password);
-        if (isMatch) {
-          currentUser = {
-            id: user.id,
-            username: user.username,
-          };
-          return true;
-        }
-      }
-      return false;
+    const user = await User.findOne({
+      $or: [{ username: data.identifier }, { email: data.identifier }],
     });
+    if (!user) throw new Error("Wrong username/email")
 
+    // Autenticación
+    const isMatch = await bcrypt.compare(data.password, user.password)
+    if (!isMatch) throw new Error("Wrong password")
+    
     // Generación de token
-    if (currentUser) {
-      const accessToken = generateAccessToken(currentUser);
-      const refreshToken = jwt.sign(
-        currentUser,
-        process.env.REFRESH_TOKEN_SECRET
-      );
-      refreshTokens.push(refreshToken);
-      return { accessToken, refreshToken };
-    }
+    const accessToken = generateAccessToken({
+      id: user._id,
+      username: user.username,
+    });
+    const refreshToken = generateRefreshToken({
+      id: user._id,
+      username: user.username,
+    });
+    
+    return { accessToken, refreshToken }
 
-    return -1;
   } catch (error) {
-    console.error("Error in login:", error);
-    throw new Error("Error in login");
+    if (error.message.includes("Wrong")) throw error
+    else {
+      console.error("Error in login:", error);
+      throw new Error("Error in login");
+    }
   }
 };
 
-exports.logoutUser = (refreshToken) => {
+exports.logoutUser = async (refreshToken) => {
   try {
-    refreshTokens = refreshTokens.filter((token) => token !== refreshToken)
+    await Token.deleteOne({
+      token: refreshToken
+    })
   } catch (error) {
     console.error("Error in logout:", error);
     throw new Error("Error in logout");

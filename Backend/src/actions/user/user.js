@@ -44,24 +44,23 @@ const createUser = async (userData) => {
   }
 };
 
-const getUserById = async (userId) => {
+const findUserById = async (userId) => {
   try {
     let user;
     if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
       return user;
     }
-    user = await User.findById(userId)
-    return user
-  }
-  catch (error) {
+    user = await User.findById(userId);
+    return user;
+  } catch (error) {
     console.error("Error searching for user:", error);
     throw new Error("Error searching for user in db");
   }
-}
+};
 
 const removeUser = async (userId) => {
   try {
-    const user = await getUserById(userId);
+    const user = await findUserById(userId);
     if (!user) throw new Error("User not found")
     await user.deleteOne({
       _id: user._id
@@ -80,5 +79,5 @@ module.exports = {
   getAllUsers,
   createUser,
   removeUser,
-  getUserById,
+  findUserById,
 };

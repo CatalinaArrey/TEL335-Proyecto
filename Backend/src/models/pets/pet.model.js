@@ -8,7 +8,10 @@ const petSchema = new mongoose.Schema({
   species: String,
   breed: String,
   birthday: Date,
-  appointments: { type: [mongoose.SchemaTypes.ObjectId], default: [] }
+  appointments: {
+    type: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Appointment' }],
+    default: [],
+  },
 });
 
 module.exports = mongoose.model("Pet", petSchema);

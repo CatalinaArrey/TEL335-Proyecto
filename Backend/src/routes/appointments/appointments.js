@@ -1,10 +1,10 @@
 import apptActions from '../../actions/appointments/appointments'
 
 
-exports.getAppointmentsByPet = (ctx) => {
+exports.getAppointmentsByPet = async (ctx) => {
   try {
-    const petId = Number(ctx.params.petId);
-    const appts = apptActions.listAppointmentsByPet(petId);
+    const petId = ctx.params.petId
+    const appts = await apptActions.listAppointmentsByPet(petId);
 
     ctx.body = {
       status: "OK",
@@ -14,77 +14,68 @@ exports.getAppointmentsByPet = (ctx) => {
     return ctx;
 
   } catch {
-    ctx.body = {
-      status: "NOK",
-      error_msg: "INTERNAL SERVER ERROR",
-    };
-    ctx.status = 500;
-
+    if (error.message === "Pet not found") {
+      ctx.body = {
+        status: "NOK",
+        error_msg: error.message,
+      };
+      ctx.status = 404;
+    } else {
+      ctx.body = {
+        status: "NOK",
+        error_msg: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
     return ctx;
   }
 
 }
 
-exports.createAppointment = (ctx) => {
+exports.createAppointment = async (ctx) => {
   try {
-    const params = ["date", "title"];
-    const optionalParams = ["desc", "place"];
+    const petId = ctx.params.petId
+    const { date, title, place, desc } = ctx.request.body;
+    if (!date) throw new Error("Invalid parameter: date");
+    if (!title) throw new Error("Invalid parameter: title");
 
-    const petId = Number(ctx.params.petId);
-    const data = ctx.request.body;
-
-    let error = 0;
-    let error_msg = "";
-
-    params.forEach((key) => {
-      let value = data[key];
-
-      if (value === undefined || value.length === 0) {
-        error_msg = `Invalid ${key}`;
-        error = 1;
-        return;
-      }
-    });
-
-    optionalParams.forEach((key) => {
-      let value = data[key];
-      if (value===undefined || value===null) {
-        data[key] = ""
-      }
-    })
-
-    if (error) {
-      ctx.body = {
-        status: "NOK",
-        error_msg,
-      };
-      ctx.status = 400;
-      return ctx;
-    }
-
-    let newAppt = apptActions.scheduleAppointment(data, petId);
+    const appt = { date, title, place, desc };
+    const newAppt = await apptActions.scheduleAppointment(appt, petId);
 
     ctx.body = {
       status: "OK",
       date: newAppt,
     };
-    ctx.status = 200;
+    ctx.status = 201;
     return ctx;
     
   } catch {
-    ctx.body = {
-      status: "NOK",
-      error_msg: "INTERNAL SERVER ERROR",
-    };
-    ctx.status = 500;
-
+    if (error.message.includes("Invalid parameter")) {
+      ctx.body = {
+        status: "NOK",
+        error_msg: error.message,
+      };
+      ctx.status = 400;
+    } else if (error.message === "Pet not found") {
+      ctx.body = {
+        status: "NOK",
+        error_msg: error.message,
+      };
+      ctx.status = 404;
+    } else {
+      ctx.body = {
+        status: "NOK",
+        error_msg: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
     return ctx;
   }
 }
 
 exports.updateAppointment = (ctx) => {
   try {
-    // const params = ["date", "title", "desc", "place"];
+    const { date, title, place, desc } = ctx.request.body
 
     const apptId = Number(ctx.params.appointmentId);
     const data = ctx.request.body;
@@ -137,3 +128,65 @@ exports.updateAppointment = (ctx) => {
     return ctx;
   }
 }
+
+exports.deleteAppointment = async (ctx) => {
+  try {
+    const apptId = ctx.request.params.appointmentId;
+    await apptActions.removeAppointment(apptId);
+    ctx.body = {
+      status: "OK",
+      msg: "Appointment was successfully removed",
+    };
+    ctx.status = 200;
+    return ctx;
+  } catch (error) {
+    if (error.message.includes("not found") ) {
+      ctx.status = 404;
+      ctx.body = {
+        status: "NOK",
+        msg: error.message,
+      };
+    } else {
+      console.error(error);
+
+      ctx.body = {
+        status: "NOK",
+        error_msg: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
+    return ctx;
+  }
+}
+
+exports.getAppointmentById = async (ctx) => {
+  try {
+    const apptId = ctx.request.params.appointmentId;
+    const appointment = await apptActions.findAppointmentById(apptId);
+    if (!appointment) throw new Error("Appointment not found");
+
+    ctx.body = {
+      status: "OK",
+      appointment,
+    };
+    ctx.status = 200;
+    return ctx;
+  } catch (error) {
+    if (error.message === "Appointment not found") {
+      ctx.status = 404;
+      ctx.body = {
+        status: "NOK",
+        msg: error.message,
+      };
+    } else {
+      console.error(error);
+
+      ctx.body = {
+        status: "NOK",
+        error_msg: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
+    return ctx;
+  }
+};

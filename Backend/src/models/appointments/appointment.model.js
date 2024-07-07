@@ -10,7 +10,7 @@ const appointmentSchema = new mongoose.Schema({
     required: true,
   },
   place: String,
-  description: Text,
+  description: String,
 });
 
 module.exports = mongoose.model("Appointment", appointmentSchema);
