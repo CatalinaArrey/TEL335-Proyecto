@@ -23,13 +23,44 @@ export default function Register() {
     const [phoneVerify, setPhoneVerify] = useState(false);
     const [showPass, setShowPass] = useState(false);
 
+    const onSuccess = () => {
+        Alert.alert("Success", "User created successfully!");
+        navigation.navigate("RegisterPet");
+    };
 
-    const newUser = {
-        username,
-        password,
-        email,
-        phone,
-    }
+    const handleRegisterUser = async () => {
+        try {
+            const userData = {
+                username,
+                password,
+                email,
+                phone,
+            }
+        
+            const response = await axios.post("http://192.168.1.89:3000/user", userData);
+
+            if (response.status === 200) {
+                console.log("Pet registration successful:", response.data);
+                onSuccess(); 
+            } else {
+                console.error("Unexpected response: ", response);
+                Alert.alert("Error", "Unexpected response from server. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error sending data: ", error);
+            if (error.response) {
+                console.error("Error response data: ", error.response.data);
+                Alert.alert("Error", `Server responded with status code ${error.response.status}: ${error.response.data.message || 'Unknown error'}`);
+            } else if (error.request) {
+                console.error("Error request: ", error.request);
+                Alert.alert("Error", "No response from server. Please check your network connection.");
+            } else {
+                console.error("Error message: ", error.message);
+                Alert.alert("Error", `Error in request setup: ${error.message}`);
+            }
+        }
+    };
+
 
     function handleName(e) {
         const nameVar = e.nativeEvent.text;
@@ -73,10 +104,6 @@ export default function Register() {
         }
     }
 
-    const onSuccess = () => {
-        Alert.alert("Success", "User created successfully!");
-        navigation.navigate("RegisterPet");
-    };
 
     return (
         <ScrollView
@@ -169,7 +196,7 @@ export default function Register() {
                     </Text>
                 }
 
-                <ButtonRegister data={newUser} onSuccess={onSuccess} />
+                <ButtonRegister type="user" onPress={handleRegisterUser} />
                 <Text style={styles.subtitle}>O crea tu cuenta con </Text>
                 <TouchableOpacity onPress={handleLogin}>
                     <Text style={styles.login}>¿Ya tienes cuenta? Ingresa</Text>

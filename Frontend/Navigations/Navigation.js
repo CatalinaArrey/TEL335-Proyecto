@@ -5,25 +5,40 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import Calendario from '../screens/Calendars';
-import Pets from "../screens/Pets";
+import Calendarios from '../screens/NavBarViews/Calendars';
+import Pets from "../screens/NavBarViews/Pets";
 import Profile from "../screens/Profile";
 import TopBar from '../components/TopBar';
-import PetStack from '../screens/PetStack';
+import PetStack from '../components/Pets/PetStack';
 import RegisterPet from '../screens/RegisterPet';
 import Settings from '../screens/Settings';
+import EditDate from '../screens/Dates/EditDate';
+import NewDate from '../screens/Dates/NewDate';
 
 const Tab = createMaterialBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 const PetStackNavigator = createNativeStackNavigator();
+const DateStackNavigator = createNativeStackNavigator();
 
-function MyStack() {
+
+function MyStackPet() {
     return (
         <PetStackNavigator.Navigator initialRouteName="PetsView" screenOptions={{ headerShown: false }}>
             <PetStackNavigator.Screen name="PetsView" component={Pets} />
             <PetStackNavigator.Screen name="PetStack" component={PetStack} />
             <PetStackNavigator.Screen name="RegisterPet" component={RegisterPet} />
+
         </PetStackNavigator.Navigator>
+    )
+}
+
+function MyStackDate() {
+    return (
+        <DateStackNavigator.Navigator initialRouteName="Calendarios" screenOptions={{ headerShown: false }}>
+            <DateStackNavigator.Screen name="Calendarios" component={Calendarios} />
+            <DateStackNavigator.Screen name="EditDate" component={EditDate} />
+            <DateStackNavigator.Screen name="NewDate" component={NewDate} />
+        </DateStackNavigator.Navigator>
     )
 }
 
@@ -37,7 +52,7 @@ function MyTabs() {
         >
             <Tab.Screen
                 name="Mascotas"
-                component={MyStack}
+                component={MyStackPet}
                 options={{
                     tabBarLabel: "Mascotas",
                     tabBarIcon: () => (
@@ -47,7 +62,7 @@ function MyTabs() {
             />
             <Tab.Screen
                 name="Calendario"
-                component={Calendario}
+                component={MyStackDate}
                 options={{
                     tabBarLabel: "Calendario",
                     tabBarIcon: () => (

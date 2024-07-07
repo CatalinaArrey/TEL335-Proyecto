@@ -1,22 +1,36 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, ScrollView, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
-const petData = [
-  { id: 1, name: "Firulais", breed: "Labrador", age: 3, image: "https://ca-times.brightspotcdn.com/dims4/default/796e6c9/2147483647/strip/true/crop/1970x1108+39+0/resize/1200x675!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F12%2Fa5%2F79e097ccf62312d18a025f22ce48%2Fhoyla-recuento-11-cosas-aman-gatos-top-001" },
-  { id: 2, name: "Mishi", breed: "Siamés", age: 2, image: "https://img2.rtve.es/i/?w=1600&i=1618587961630.jpg" },
-  { id: 3, name: "Rex", breed: "Pastor Alemán", age: 4, image: "https://okdiario.com/img/2020/07/25/curiosidades-sobre-la-inteligencia-de-los-gatos-635x358.jpg" }
-];
+import axios from "axios";
 
 const Pets = () => {
   const navigation = useNavigation();
+  const [pets, setPets] = useState([]);
+  const [selectedPet, setSelectedPet] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    fetchPets();
+  }, []);
+
+  const fetchPets = async () => {
+    try {
+      const response = await axios.get("http://192.168.1.89:3000/pets/:userId"); // Reemplaza :userId con el ID del usuario actual
+      if (response.status === 200) {
+        setPets(response.data.pets); // Asegúrate de que `response.data.pets` sea la estructura correcta de tus datos
+      } else {
+        console.error("Unexpected response: ", response);
+        Alert.alert("Error", "Unexpected response from server. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error fetching pets: ", error);
+      Alert.alert("Error", "Failed to fetch pets. Please check your network connection.");
+    }
+  };
 
   const handleRegisterPet = () => {
     navigation.navigate("RegisterPet");
   };
-
-  const [selectedPet, setSelectedPet] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
 
   const showPetDetails = (pet) => {
     setSelectedPet(pet);
@@ -28,7 +42,7 @@ const Pets = () => {
   };
 
   const renderPetList = () => {
-    return petData.map((pet) => (
+    return pets.map((pet) => (
       <TouchableOpacity key={pet.id} style={styles.petContainer} onPress={() => showPetDetails(pet)}>
         <Image source={{ uri: pet.image }} style={styles.petImage} />
         <Text style={styles.petName}>{pet.name}</Text>
@@ -39,9 +53,9 @@ const Pets = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Mis Mascotas</Text>
-      <View style={styles.petList}>
+      <ScrollView style={styles.petList}>
         {renderPetList()}
-      </View>
+      </ScrollView>
       <TouchableOpacity style={styles.addButton} onPress={handleRegisterPet}>
         <Text style={styles.addButtonIcon}>+</Text>
       </TouchableOpacity>
@@ -57,7 +71,6 @@ const Pets = () => {
               <>
                 <Text>Nombre: {selectedPet.name}</Text>
                 <Text>Raza: {selectedPet.breed}</Text>
-                <Text>Edad: {selectedPet.age}</Text>
               </>
             )}
             <TouchableOpacity onPress={closeModal}>
@@ -70,22 +83,26 @@ const Pets = () => {
   );
 };
 
+export default Pets;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FBFCFC',
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingTop: 50,
   },
   title: {
     fontSize: 30,
     fontWeight: 'bold',
     color: '#5DADE2',
-    marginBottom: 20
+    marginBottom: 20,
   },
   petList: {
     width: '100%',
     paddingHorizontal: 20,
+    flex: 1,
   },
   petContainer: {
     flexDirection: 'row',
@@ -138,7 +155,4 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: '#fff',
   },
-  
 });
-
-export default Pets;

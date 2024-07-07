@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
+import { StatusBar, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
+import axios from "axios";
+import { useNavigation } from '@react-navigation/native';
 
-import ButtonRegister from '../components/Register/ButtonRegister'
+import ButtonRegister from '../components/Register/ButtonRegister';
 import Calendario from '../components/CalendarPicker';
 
 const speciesOptions = [
@@ -17,25 +19,19 @@ const speciesOptions = [
 ];
 
 const RegisterPet = () => {
+    const navigation = useNavigation();
     const [petName, setPetName] = useState('');
-    const [petNameVerify, setpetNameVerify] = useState(false);
+    const [petNameVerify, setPetNameVerify] = useState(false);
     const [especie, setEspecie] = useState('');
     const [raza, setRaza] = useState('');
     const [cumpleanos, setCumpleanos] = useState('');
     const [image, setImage] = useState(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
 
-
-    function handleName(e) {
-        const petnameVar = e.nativeEvent.text;
-        setPetName(petnameVar);
-        setpetNameVerify(false);
-
-        if (petnameVar.length > 1) {
-            setpetNameVerify(true);
-        }
-
-    }
+    const handleName = (text) => {
+        setPetName(text);
+        setPetNameVerify(text.length > 1);
+    };
 
     const showDatePickerHandler = () => {
         setShowDatePicker(true);
@@ -52,18 +48,56 @@ const RegisterPet = () => {
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          allowsEditing: true,
-          aspect: [4, 3],
-          quality: 1,
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
         });
-    
-        if (!result.canceled) {
-          setImage(result.assets[0].uri);
-        }
-      };
 
-      
+        if (!result.cancelled) {
+            setImage(result.assets[0].uri);
+        }
+    };
+
+    const onSuccess = () => {
+        Alert.alert("Success", "Pet created successfully!");
+        navigation.navigate("Navigation");
+    };
+
+    const handleRegisterPet = async () => {
+        try {
+            const petData = {
+                name: petName,
+                species: especie,
+                breed: raza,
+                birthday: cumpleanos,
+                image: image, // Asegúrate de enviar la imagen correctamente
+            };
+
+            const response = await axios.post("http://192.168.1.89:3000/pets", petData);
+
+            if (response.status === 200) {
+                console.log("Pet registration successful:", response.data);
+                onSuccess(); // Llama a la función onSuccess después de un registro exitoso
+            } else {
+                console.error("Unexpected response:", response);
+                Alert.alert("Error", "Unexpected response from server. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error sending data:", error);
+            if (error.response) {
+                console.error("Error response data:", error.response.data);
+                Alert.alert("Error", `Server responded with status code ${error.response.status}: ${error.response.data.error_msg || 'Unknown error'}`);
+            } else if (error.request) {
+                console.error("Error request:", error.request);
+                Alert.alert("Error", "No response from server. Please check your network connection.");
+            } else {
+                console.error("Error message:", error.message);
+                Alert.alert("Error", `Error in request setup: ${error.message}`);
+            }
+        }
+    };
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>¡Ingresa a tu mascota!</Text>
@@ -74,7 +108,7 @@ const RegisterPet = () => {
                     placeholder="Nombre"
                     style={styles.textInput}
                     value={petName}
-                    onChange={e => handleName(e)}
+                    onChangeText={handleName}
                 />
                 {petName.length < 1 ? null : petNameVerify ?
                     (<MaterialCommunityIcons name="check-circle-outline" color="green" size={24} />)
@@ -95,9 +129,9 @@ const RegisterPet = () => {
                     onValueChange={(itemValue, itemIndex) => {
                         setEspecie(itemValue);
                         setRaza("");
-                    }
-                    }
-                ><Picker.Item label="Selecciona especie" value="" />
+                    }}
+                >
+                    <Picker.Item label="Selecciona especie" value="" />
                     {speciesOptions.map((option) => (
                         <Picker.Item
                             key={option.value}
@@ -111,7 +145,7 @@ const RegisterPet = () => {
 
             <View style={styles.inputContainer}>
                 <MaterialCommunityIcons name={speciesOptions.find(option => option.value === especie)?.icon || 'paw'} color="#9A9A9A" size={24} style={styles.inputIcon} />
-                {especie === 'otro' ? (
+                {especie === 'Otro' ? (
                     <TextInput
                         placeholder="Escribe el tipo de animal"
                         style={styles.textInput}
@@ -136,16 +170,8 @@ const RegisterPet = () => {
                 <MaterialCommunityIcons name="cake-layered" color="#9A9A9A" size={24} style={styles.inputIcon} />
                 <Text style={styles.textInput}>{cumpleanos || "Cumpleaños"}</Text>
             </TouchableOpacity>
-            <View style={styles.inputContainer}>
-                <MaterialCommunityIcons name="camera" color="#9A9A9A" size={24} style={styles.inputIcon} />
-                <TouchableOpacity onPress={pickImage} style={styles.textInput}>
-                    <Text>{image ? "Imagen seleccionada" : "Selecciona una imagen"}</Text>
-                </TouchableOpacity>
-            </View>
 
-            {image && <Image source={{ uri: image }} style={styles.image} />}
-
-            <ButtonRegister />
+            <ButtonRegister type="pet" onPress={handleRegisterPet} />
             <Calendario
                 visible={showDatePicker}
                 onConfirm={handleConfirmDate}
@@ -154,8 +180,7 @@ const RegisterPet = () => {
             <StatusBar style="auto" />
         </View>
     );
-
-}
+};
 
 export default RegisterPet;
 
@@ -189,10 +214,6 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: '#2C3E50',
     },
-    text: {
-        fontSize: 20,
-        color: '#566573',
-    },
     textInput: {
         padding: 10,
         paddingStart: 5,
@@ -202,9 +223,4 @@ const styles = StyleSheet.create({
     inputIcon: {
         marginLeft: 15,
     },
-    login: {
-        fontSize: 14,
-        color: '#A3E4D7',
-        marginTop: 20,
-    }
 });
