@@ -11,7 +11,9 @@ router.get('/health', getHealth)
 
 
 router.post("/user", user.register);
-router.get("/user", auth.authenticateToken, user.getUsers);
+// router.get("/user", auth.authenticateToken, user.getUsers);
+router.get("/user", user.getUsers);
+router.delete("/user/:userId", user.deleteUser)
 
 router.post("/auth/login", auth.login);
 router.post("/auth/token", auth.token);
