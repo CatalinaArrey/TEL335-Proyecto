@@ -62,13 +62,13 @@ const getUserById = async (userId) => {
 const removeUser = async (userId) => {
   try {
     const user = await getUserById(userId);
-    if (!user) throw new Error("User was not found")
+    if (!user) throw new Error("User not found")
     await user.deleteOne({
       _id: user._id
     })
   }
   catch (error) {
-    if (error.message === "User was not found") throw error
+    if (error.message === "User not found") throw error
     else {
       console.error("Error trying to delete user:", error);
       throw new Error("Error removing user from db");

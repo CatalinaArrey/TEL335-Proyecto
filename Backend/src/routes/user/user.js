@@ -48,7 +48,6 @@ exports.register = async (ctx) => {
 
 exports.getUsers = async (ctx) => {
   try {
-    // const users = userActions.getAllUsers()
     const users = await userActions.getAllUsers()
 
     ctx.body = {
@@ -83,7 +82,7 @@ exports.deleteUser = async (ctx) => {
     return ctx
   }
   catch (error) {
-    if (error.message === "User was not found") {
+    if (error.message === "User not found") {
       ctx.status = 404
       ctx.body = {
         status: "NOK",
