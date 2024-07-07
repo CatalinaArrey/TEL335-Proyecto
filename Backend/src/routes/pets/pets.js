@@ -1,59 +1,52 @@
 import petActions from '../../actions/pets/pets'
 
 
-exports.register = (ctx) => {
+exports.register = async (ctx) => {
   try {
-    const params = ["name", "species", "breed", "birthday"];
-    const data = ctx.request.body;
+    const userId = ctx.state.user.id;
+    const {name, species, breed, birthday} = ctx.request.body;
+    if (!name) throw new Error("Invalid parameter: name");
 
-    let error = 0;
-    let error_msg = "";
-
-    const userId = 1; // HARDCODED
-
-    params.forEach((key) => {
-      let value = data[key];
-
-      if (value === undefined || value.length === 0) {
-        error_msg = `Invalid ${key}`;
-        error = 1;
-        return;
-      }
-    });
-
-    if (error) {
-      ctx.body = {
-        status: "NOK",
-        error_msg,
-      };
-      ctx.status = 400;
-      return ctx;
-    }
-
-    let newPet = petActions.createPet(data, userId);
+    const pet = { name, species, breed, birthday };
+    const newPet = await petActions.createPet(pet, userId);
 
     ctx.body = {
       status: "OK",
       pet: newPet,
     };
-    ctx.status = 200;
+    ctx.status = 201;
     return ctx;
   } catch {
-    ctx.body = {
-      status: "NOK",
-      error_msg: "INTERNAL SERVER ERROR",
-    };
-    ctx.status = 500;
-
+    if ( error.message === "Invalid parameter: name") {
+      ctx.body = {
+        status: "NOK",
+        error_msg: error.message,
+      };
+      ctx.status = 400;
+    }
+    else if (error.message === "User not found") {
+      ctx.body = {
+        status: "NOK",
+        error_msg: error.message,
+      };
+      ctx.status = 404;
+    }
+    else{
+      ctx.body = {
+        status: "NOK",
+        error_msg: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
     return ctx;
   }
 
 }
 
-exports.getPetsByUser = (ctx) => {
+exports.getPetsByUser = async (ctx) => {
   try {
-    const userId = Number(ctx.params.userId)
-    const pets = petActions.listPetsByUser(userId);
+    const userId = ctx.state.user.id;
+    const pets = await petActions.listPetsByUser(userId);
 
     ctx.body = {
       status: "OK",
@@ -63,12 +56,81 @@ exports.getPetsByUser = (ctx) => {
     return ctx;
 
   } catch {
-    ctx.body = {
-      status: "NOK",
-      error_msg: "INTERNAL SERVER ERROR",
-    };
-    ctx.status = 500;
-
+    if (error.message === "User not found") {
+      ctx.body = {
+        status: "NOK",
+        error_msg: error.message,
+      };
+      ctx.status = 404;
+    } else {
+      ctx.body = {
+        status: "NOK",
+        error_msg: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
     return ctx;
   }
 }
+
+exports.deletePet = async (ctx) => {
+  try {
+    const petId = ctx.request.params.petId;
+    await petActions.removePet(petId);
+    ctx.body = {
+      status: "OK",
+      msg: "Pet was successfully removed",
+    };
+    ctx.status = 200;
+    return ctx;
+  } catch (error) {
+    if (error.message.includes("not found")) {
+      ctx.status = 404;
+      ctx.body = {
+        status: "NOK",
+        msg: error.message,
+      };
+    } else {
+      console.error(error);
+
+      ctx.body = {
+        status: "NOK",
+        error_msg: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
+    return ctx;
+  }
+}
+
+exports.getPetById = async (ctx) => {
+  try {
+    const petId = ctx.request.params.petId;
+    const pet = await petActions.findPetById(petId);
+    if (!pet) throw new Error("Pet not found");
+
+    ctx.body = {
+      status: "OK",
+      pet,
+    };
+    ctx.status = 200;
+    return ctx;
+  } catch (error) {
+    if (error.message === "Pet not found") {
+      ctx.status = 404;
+      ctx.body = {
+        status: "NOK",
+        msg: error.message,
+      };
+    } else {
+      console.error(error);
+
+      ctx.body = {
+        status: "NOK",
+        error_msg: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
+    return ctx;
+  }
+};
