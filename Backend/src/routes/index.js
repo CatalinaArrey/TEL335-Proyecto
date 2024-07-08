@@ -9,22 +9,24 @@ const router = new Router()
 
 router.get('/health', getHealth)
 
-
 router.post("/user", user.register);
-// router.get("/user", auth.authenticateToken, user.getUsers);
-router.get("/user", user.getUsers);
+router.get("/users", user.getUsers);
+router.get("/user", auth.authenticateToken, user.getUserById);
 router.delete("/user/:userId", user.deleteUser)
 
 router.post("/auth/login", auth.login);
 router.post("/auth/token", auth.token);
 router.post("/auth/logout", auth.logout);
 
-router.post("/pets/:userId", pets.register);
-router.get("/pets/:userId", pets.getPetsByUser)
-router.delete("/pets/:petId", pets.deletePet);
+router.post("/pet", auth.authenticateToken, pets.register);
+router.get("/pets", auth.authenticateToken, pets.getPetsByUser);
+router.get("/pet/:petId", pets.getPetById);
+router.delete("/pet/:petId", pets.deletePet);
 
-router.get("/appointments/:petId", appointments.getAppointmentsByPet)
-router.post("/appointments/:petId", appointments.createAppointment)
-router.put("/appointments/:appointmentId", appointments.updateAppointment)
+router.post("/appointment/:petId", appointments.createAppointment)
+router.get("/appointments/:petId", appointments.getAppointmentsByPet);
+router.get("/appointment/:appointmentId", appointments.getAppointmentById);
+router.put("/appointment/:appointmentId", appointments.updateAppointment)
+router.delete("/appointment/:appointmentId", appointments.deleteAppointment)
 
 export default router

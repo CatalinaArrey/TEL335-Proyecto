@@ -101,3 +101,35 @@ exports.deleteUser = async (ctx) => {
     return ctx;
   }
 }
+
+exports.getUserById = async (ctx) => {
+  try {
+    const userId = ctx.state.user.id
+    const user = await userActions.findUserById(userId);
+    if (!user) throw new Error("User not found");
+
+    ctx.body = {
+      status: "OK",
+      user,
+    };
+    ctx.status = 200;
+    return ctx;
+  } catch (error) {
+    if (error.message === "User not found") {
+      ctx.status = 404;
+      ctx.body = {
+        status: "NOK",
+        msg: error.message,
+      };
+    } else {
+      console.error(error);
+
+      ctx.body = {
+        status: "NOK",
+        error_msg: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
+    return ctx;
+  }
+}

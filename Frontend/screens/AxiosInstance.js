@@ -1,15 +1,14 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const instance = axios.create({
+const axiosInstance = axios.create({
   baseURL: 'http://192.168.1.89:3000',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor para adjuntar el token de acceso en las solicitudes
-instance.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   async (config) => {
     const accessToken = await AsyncStorage.getItem('accessToken');
     if (accessToken) {
@@ -22,4 +21,4 @@ instance.interceptors.request.use(
   }
 );
 
-export default instance;
+export default axiosInstance;

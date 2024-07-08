@@ -42,7 +42,7 @@ const createUser = async (userData) => {
   }
 };
 
-const getUserById = async (userId) => {
+const findUserById = async (userId) => {
   try {
     let user;
     if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
@@ -58,11 +58,14 @@ const getUserById = async (userId) => {
 
 const removeUser = async (userId) => {
   try {
-    const user = await getUserById(userId);
-    if (!user) throw new Error("User not found");
-    await user.deleteOne({ _id: user._id });
-  } catch (error) {
-    if (error.message === "User not found") throw error;
+    const user = await findUserById(userId);
+    if (!user) throw new Error("User not found")
+    await user.deleteOne({
+      _id: user._id
+    })
+  }
+  catch (error) {
+    if (error.message === "User not found") throw error
     else {
       console.error("Error trying to delete user:", error);
       throw new Error("Error removing user from db");
@@ -94,6 +97,6 @@ module.exports = {
   getAllUsers,
   createUser,
   removeUser,
-  getUserById,
+  findUserById,
   loginUser,
 };

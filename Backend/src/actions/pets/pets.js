@@ -3,9 +3,9 @@ const User = require('../../models/user/user.model');
 const Pet = require('../../models/pets/pet.model');
 
 
-exports.createPet = async (petData, ownerId) => {
+const createPet = async (petData, ownerId) => {
   try {
-    const user = await userActions.getUserById(ownerId)
+    const user = await userActions.findUserById(ownerId);
     if (!user) throw new Error("User not found");
 
     const pet = new Pet({
@@ -29,11 +29,16 @@ exports.createPet = async (petData, ownerId) => {
   }
 }
 
-exports.listPetsByUser = async (ctx) => {
+const listPetsByUser = async (ownerId) => {
   try {
-    const userId = ctx.params.userId; // Asegúrate de obtener el userId correctamente desde el contexto (ctx)
-    const pets = await Pet.find({ user: userId }); // Asegúrate de usar el campo correcto para buscar mascotas por usuario
-    ctx.body = { pets };
+    let pets
+    if (!ownerId.match(/^[0-9a-fA-F]{24}$/)) throw new Error("User not found");
+    
+    const user = await User.findById(ownerId).populate("pets").exec()
+    if (!user) throw new Error("User not found");
+
+    pets = user.pets
+    return pets
   } catch (error) {
     console.error("Error searching for pets: ", error);
     ctx.status = 500;
@@ -42,7 +47,7 @@ exports.listPetsByUser = async (ctx) => {
 };
 
 
-exports.removePet = async (petId) => {
+const removePet = async (petId) => {
   try {
     const user = await User.findOneAndUpdate(
       { pets: petId },
@@ -51,7 +56,7 @@ exports.removePet = async (petId) => {
     ).exec()
     if (!user) throw new Error("Pet not found");
 
-    const pet = await Pet.findById(petId);
+    const pet = await findPetById(petId);
     if (!pet) throw new Error("Pet not found");
 
     await pet.deleteOne({
@@ -66,3 +71,24 @@ exports.removePet = async (petId) => {
     }
   }
 }
+
+const findPetById = async (petId) => {
+  try {
+    let pet;
+    if (!petId.match(/^[0-9a-fA-F]{24}$/)) {
+      return pet;
+    }
+    pet = await Pet.findById(petId);
+    return pet;
+  } catch (error) {
+    console.error("Error searching for pet:", error);
+    throw new Error("Error searching for pet in db");
+  }
+};
+
+module.exports = {
+  createPet,
+  listPetsByUser,
+  removePet,
+  findPetById,
+};

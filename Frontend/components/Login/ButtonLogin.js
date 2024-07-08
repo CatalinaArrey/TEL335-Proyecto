@@ -1,36 +1,37 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import axiosInstance from "../../screens/AxiosInstance"; 
+import axios from "axios";
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ButtonLogin(props) {
+
     const navigation = useNavigation();
 
     const handleLogin = async () => {
-        const { identifier, password } = props.data;
+        const data = props.data;
 
-        if (!identifier || !password) {
-            console.error("Datos incompletos para iniciar sesión");
+        if (!data) {
+            console.error("No se recibieron datos para iniciar sesión");
             return;
         }
 
         try {
-            const response = await axiosInstance.post("/auth/login", { identifier, password });
-            console.log("Datos enviados para iniciar sesión:", props.data);
+            const response = await axios.post("http://192.168.1.89:3000/auth/login", data);
+            console.log("LOG ", props.data);
             console.log(response.data);
 
+            // Verifica la respuesta del servidor
             if (response.data.status === 'OK') {
+                // Almacenar los tokens
                 await AsyncStorage.setItem('accessToken', response.data.accessToken);
                 await AsyncStorage.setItem('refreshToken', response.data.refreshToken);
-                const userId = response.data.userId; // Asumiendo que el servidor envía userId
-                if (userId) {
-                    await AsyncStorage.setItem('userId', userId);
-                }
+                
+                // Navegar a la pantalla principal
                 navigation.navigate('Navigation');
             } else {
-                console.log("Inicio de sesión fallido: ", response.data.error_msg);
+                console.log("Inicio de sesión fallido: ", response.data.msg);
             }
         } catch (error) {
             if (error.response) {

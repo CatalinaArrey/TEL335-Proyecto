@@ -20,15 +20,15 @@ exports.authenticateToken = async (ctx, next) => {
   }
 };
 
-exports.token = (ctx) => {
+exports.token = async (ctx) => {
   try {
     const refreshToken = ctx.request.body.token;
-    if (refreshToken == null) {
+    if (!refreshToken) {
       ctx.status = 401;
       return ctx;
     }
 
-    const newToken = authActions.refreshAccessToken(refreshToken);
+    const newToken = await authActions.refreshAccessToken(refreshToken);
 
     if (!newToken) {
       ctx.status = 403;
@@ -52,43 +52,40 @@ exports.token = (ctx) => {
 
 exports.login = async (ctx) => {
   try {
-    const { identifier, password } = ctx.request.body;
+    const { identifier, password } = ctx.request.body
+    if (!identifier) throw new Error("Missing username/email");
+    if (!password) throw new Error("Missing password");
 
-    // Verificar que identifier y password estén presentes
-    if (!identifier || !password) {
-      ctx.body = {
-        status: "NOK",
-        error_message: "Missing identifier or password",
-      };
-      ctx.status = 400;
-      return ctx;
-    }
+    const userData = { identifier, password };
+    const tokens = await authActions.loginUser(userData);
 
-    // Llamar a la función loginUser con los datos correctos
-    const tokens = await authActions.loginUser({ identifier, password });
-
-    if (tokens !== -1) {
-      ctx.body = {
-        status: "OK",
-        ...tokens,
-      };
-      ctx.status = 200;
-    } else {
+    if (!tokens.accessToken || !tokens.refreshToken) throw new Error("Wrong credentials")
+    
+    ctx.body = {
+      status: "OK",
+      ...tokens,
+    };
+    ctx.status = 200;
+    return ctx;
+  } catch (error) {
+    if (error.message.includes("Wrong") || error.message.includes("Missing")) {
       ctx.body = {
         status: "Unauthorized",
         msg: "Wrong credentials. Check your username/email or password",
       };
       ctx.status = 401;
     }
+    else {
+      console.error(error);
 
-  } catch (error) {
-    console.error(error);
+      ctx.body = {
+        status: "NOK",
+        error_message: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
 
-    ctx.body = {
-      status: "NOK",
-      error_message: "INTERNAL SERVER ERROR",
-    };
-    ctx.status = 500;
+    return ctx;
   }
 };
 

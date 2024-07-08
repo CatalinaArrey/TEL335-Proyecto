@@ -3,7 +3,7 @@ import petActions from '../../actions/pets/pets'
 
 exports.register = async (ctx) => {
   try {
-    const userId = ctx.request.params.userId
+    const userId = ctx.state.user.id;
     const {name, species, breed, birthday} = ctx.request.body;
     if (!name) throw new Error("Invalid parameter: name");
 
@@ -45,8 +45,9 @@ exports.register = async (ctx) => {
 
 exports.getPetsByUser = async (ctx) => {
   try {
-    const userId = ctx.params.userId
+    const userId = ctx.state.user.id;
     const pets = await petActions.listPetsByUser(userId);
+    if (!user) throw new Error("Pets not found");
 
     ctx.body = {
       status: "OK",
@@ -56,7 +57,7 @@ exports.getPetsByUser = async (ctx) => {
     return ctx;
 
   } catch {
-    if (error.message === "User not found") {
+    if (error.message.includes("not found")) {
       ctx.body = {
         status: "NOK",
         error_msg: error.message,
@@ -84,10 +85,7 @@ exports.deletePet = async (ctx) => {
     ctx.status = 200;
     return ctx;
   } catch (error) {
-    if (
-      error.message === "Pet not found" ||
-      error.message === "User not found"
-    ) {
+    if (error.message.includes("not found")) {
       ctx.status = 404;
       ctx.body = {
         status: "NOK",
@@ -105,3 +103,35 @@ exports.deletePet = async (ctx) => {
     return ctx;
   }
 }
+
+exports.getPetById = async (ctx) => {
+  try {
+    const petId = ctx.request.params.petId;
+    const pet = await petActions.findPetById(petId);
+    if (!pet) throw new Error("Pet not found");
+
+    ctx.body = {
+      status: "OK",
+      pet,
+    };
+    ctx.status = 200;
+    return ctx;
+  } catch (error) {
+    if (error.message === "Pet not found") {
+      ctx.status = 404;
+      ctx.body = {
+        status: "NOK",
+        msg: error.message,
+      };
+    } else {
+      console.error(error);
+
+      ctx.body = {
+        status: "NOK",
+        error_msg: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
+    return ctx;
+  }
+};
