@@ -44,18 +44,32 @@ const scheduleAppointment = async (apptData, petId) => {
     }
 };
 
-const changeAppointment = (data, apptId) => {
-  const apptIndex = appointments.findIndex((appt) => appt.id === apptId)
-  const updatedAppointment = {
-    ...appointments[apptIndex],
-    title: data.title,
-    date: data.date,
-    place: data.place,
-    desc: data.desc,
-  };
+const changeAppointment = async (data, apptId) => {
+  try {
+    const appointment = findAppointmentById(apptId);
+    if (!appointment) throw new Error("Appointment not found")
 
-  appointments[apptIndex] = updatedAppointment;
-  return updatedAppointment
+    const newData = {
+      title: data.title || appointment.title,
+      date: data.date || appointment.date,
+      place: data.place || appointment.place,
+      description: data.description || appointment.description,
+    };
+    const updatedAppointment = await Appointment.findByIdAndUpdate(
+      apptId,
+      newData,
+      { new: true, runValidators: true }
+    );
+
+    return updatedAppointment
+  }
+  catch (error) {
+    if (error.message.includes("not found")) throw error;
+    else {
+      console.error("Error updating appointment:", error);
+      throw new Error("Error updating appointment data");
+    }
+  }
 }
 
 const removeAppointment = async (apptId) => {
