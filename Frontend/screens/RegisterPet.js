@@ -4,19 +4,20 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-nativ
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
-import axios from "axios";
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import ButtonRegister from '../components/Register/ButtonRegister';
 import Calendario from '../components/CalendarPicker';
+import axiosInstance from '../components/AxiosInstance';
+import { usePets } from '../components/Pets/PetsContext'
 
 const speciesOptions = [
     { label: 'Perro', value: 'perro', icon: 'dog', razas: ['Labrador', 'Poodle', 'Bulldog', 'Pastor Alemán', 'Akita', 'Quiltro'] },
     { label: 'Gato', value: 'gato', icon: 'cat', razas: ['Siamés', 'Persa', 'Bengala', 'De Calle'] },
     { label: 'Conejo', value: 'conejo', icon: 'rabbit', razas: ['Holandés', 'Belier', 'Angora'] },
-    { label: 'Reptil', value: 'tortuga', icon: 'snake', razas: ['Serpiente', 'Tortuga', 'Iguana'] },
-    { label: 'Otro', value: 'Otro', icon: 'help-circle', razas: [] },
+    { label: 'Reptil', value: 'reptil', icon: 'snake', razas: ['Serpiente', 'Tortuga', 'Iguana'] },
+    { label: 'Otro', value: 'otro', icon: 'help-circle', razas: [] },
 ];
 
 const RegisterPet = () => {
@@ -26,8 +27,8 @@ const RegisterPet = () => {
     const [especie, setEspecie] = useState('');
     const [raza, setRaza] = useState('');
     const [cumpleanos, setCumpleanos] = useState('');
-    const [image, setImage] = useState(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const { triggerUpdate } = usePets();
 
     const handleName = (text) => {
         setPetName(text);
@@ -47,19 +48,6 @@ const RegisterPet = () => {
         hideDatePickerHandler();
     };
 
-    const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
-
-        if (!result.cancelled) {
-            setImage(result.assets[0].uri);
-        }
-    };
-
     const onSuccess = () => {
         Alert.alert("Success", "Pet created successfully!");
         navigation.navigate("Navigation");
@@ -72,22 +60,19 @@ const RegisterPet = () => {
                 species: especie,
                 breed: raza,
                 birthday: cumpleanos,
-                image: image, // Pasar Imagen, por ahora no está guardada
             };
-            const accessToken = await AsyncStorage.getItem('accessToken')
-            console.log("petdata:",petData);
-            const response = await axios.post(
-              "http://192.168.1.108:3000/pet",
-              petData, {
+            const accessToken = await AsyncStorage.getItem('accessToken');
+            console.log("petdata:", petData);
+            const response = await axiosInstance.post('/pet', petData, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
-              }
-            );
+            });
 
             if (response.status === 201) {
-                console.log("Pet registration successful:", response.data);
-                onSuccess(); // Llama a la función onSuccess después de un registro exitoso
+                Alert.alert('Mascota registrada exitosamente');
+                triggerUpdate();
+                navigation.goBack();
             } else {
                 console.error("Unexpected response:", response);
                 Alert.alert("Error", "Unexpected response from server. Please try again.");
@@ -151,10 +136,9 @@ const RegisterPet = () => {
                 </Picker>
             </View>
 
-
             <View style={styles.inputContainer}>
                 <MaterialCommunityIcons name={speciesOptions.find(option => option.value === especie)?.icon || 'paw'} color="#9A9A9A" size={24} style={styles.inputIcon} />
-                {especie === 'Otro' ? (
+                {especie === 'otro' ? (
                     <TextInput
                         placeholder="Escribe el tipo de animal"
                         style={styles.textInput}

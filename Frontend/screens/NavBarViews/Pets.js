@@ -1,20 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axiosInstance from '../../components/AxiosInstance';
+import { usePets } from '../../components/Pets/PetsContext';
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+
+const speciesIcons = {
+    perro: 'dog',
+    gato: 'cat',
+    conejo: 'rabbit',
+    reptil: 'snake',
+    otro: 'help-circle',
+};
 
 const Pets = () => {
     const navigation = useNavigation();
     const [pets, setPets] = useState([]);
     const [selectedPet, setSelectedPet] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const { shouldUpdate } = usePets();
 
     useEffect(() => {
         const fetchPets = async () => {
             try {
                 const accessToken = await AsyncStorage.getItem("accessToken");
-                const response = await axios.get('http://192.168.1.108:3000/pets', {
+                const response = await axiosInstance.get('/pets', {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
                     }
@@ -32,8 +43,8 @@ const Pets = () => {
             }
         };
 
-        fetchPets()
-    }, []);
+        fetchPets();
+    }, [shouldUpdate]);
 
     const handleRegisterPet = () => {
         navigation.navigate("RegisterPet");
@@ -51,7 +62,12 @@ const Pets = () => {
     const renderPetList = () => {
         return pets.map((pet) => (
             <TouchableOpacity key={pet.id} style={styles.petContainer} onPress={() => showPetDetails(pet)}>
-                <Image source={{ uri: pet.image }} style={styles.petImage} />
+                <MaterialCommunityIcons 
+                    name={speciesIcons[pet.species] || 'help-circle'} 
+                    size={50} 
+                    color="#5DADE2" 
+                    style={styles.petIcon} 
+                />
                 <Text style={styles.petName}>{pet.name}</Text>
             </TouchableOpacity>
         ));
@@ -117,10 +133,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginBottom: 10,
     },
-    petImage: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+    petIcon: {
         marginRight: 10,
     },
     petName: {

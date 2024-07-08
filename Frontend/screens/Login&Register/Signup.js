@@ -4,10 +4,10 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert 
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+
 
 import ButtonRegister from '../../components/Register/ButtonRegister';
-
+import axiosInstance from '../../components/AxiosInstance'
 
 export default function Register() {
     const navigation = useNavigation();
@@ -41,7 +41,7 @@ export default function Register() {
                 phone,
             }
         
-            const response = await axios.post("http://192.168.1.89:3000/user", userData);
+            const response = await axiosInstance.post('/user', userData);
 
             if (response.status === 201) {
                 console.log("Pet registration successful:", response.data);

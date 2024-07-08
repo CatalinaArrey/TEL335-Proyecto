@@ -1,9 +1,9 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import axios from "axios";
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axiosInstance from "../AxiosInstance";
 
 export default function ButtonLogin(props) {
 
@@ -13,31 +13,32 @@ export default function ButtonLogin(props) {
         const data = props.data;
 
         if (!data) {
-            console.error("No se recibieron datos para iniciar sesión");
+            Alert.alert("No se recibieron datos para iniciar sesión");
             return;
         }
 
-        try {
-            const response = await axios.post("http://192.168.1.108:3000/auth/login", data);
-            console.log("LOG ", props.data);
-            console.log(response.data);
+        console.log("Datos enviados para login:", data);
 
-            // Verifica la respuesta del servidor
+        try {
+            const response = await axiosInstance.post("/auth/login", data);
+            console.log("Respuesta del servidor:", response.data);
+
             if (response.data.status === 'OK') {
-                // Almacenar los tokens
                 await AsyncStorage.setItem('accessToken', response.data.accessToken);
                 await AsyncStorage.setItem('refreshToken', response.data.refreshToken);
-                
-                // Navegar a la pantalla principal
+
                 navigation.navigate('Navigation');
             } else {
+                Alert.alert("Inicio de sesión fallido", response.data.msg);
                 console.log("Inicio de sesión fallido: ", response.data.msg);
             }
         } catch (error) {
             if (error.response) {
                 console.error("ERROR ", error.response.data);
+                Alert.alert("Error", error.response.data.msg || "Error en el inicio de sesión");
             } else {
                 console.error("Error de red o de servidor: ", error.message);
+                Alert.alert("Error", "Error de red o de servidor: " + error.message);
             }
         }
     };
