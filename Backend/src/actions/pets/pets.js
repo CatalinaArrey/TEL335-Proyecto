@@ -31,10 +31,13 @@ const createPet = async (petData, ownerId) => {
 
 const listPetsByUser = async (ownerId) => {
   try {
+    let pets
+    if (!ownerId.match(/^[0-9a-fA-F]{24}$/)) throw new Error("User not found");
+    
     const user = await User.findById(ownerId).populate("pets").exec()
     if (!user) throw new Error("User not found");
 
-    const pets = user.pets
+    pets = user.pets
     return pets
   } catch (error) {
     if (error.message === "User not found") throw error;

@@ -23,7 +23,7 @@ exports.authenticateToken = async (ctx, next) => {
 exports.token = async (ctx) => {
   try {
     const refreshToken = ctx.request.body.token;
-    if (refreshToken == null) {
+    if (!refreshToken) {
       ctx.status = 401;
       return ctx;
     }
@@ -59,28 +59,31 @@ exports.login = async (ctx) => {
     const userData = { identifier, password };
     const tokens = await authActions.loginUser(userData);
 
-    if (tokens !== -1) {
-      ctx.body = {
-        status: "OK",
-        ...tokens
-      };
-      ctx.status = 200;
-    } else {
+    if (!tokens.accessToken || !tokens.refreshToken) throw new Error("Wrong credentials")
+    
+    ctx.body = {
+      status: "OK",
+      ...tokens,
+    };
+    ctx.status = 200;
+    return ctx;
+  } catch (error) {
+    if (error.message.includes("Wrong") || error.message.includes("Missing")) {
       ctx.body = {
         status: "Unauthorized",
         msg: "Wrong credentials. Check your username/email or password",
       };
       ctx.status = 401;
     }
-    return ctx;
-  } catch (error) {
-    console.error(error);
+    else {
+      console.error(error);
 
-    ctx.body = {
-      status: "NOK",
-      error_message: "INTERNAL SERVER ERROR",
-    };
-    ctx.status = 500;
+      ctx.body = {
+        status: "NOK",
+        error_message: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
 
     return ctx;
   }
