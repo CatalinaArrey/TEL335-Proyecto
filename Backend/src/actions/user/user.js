@@ -1,10 +1,9 @@
 import bcrypt from "bcrypt";
-import User from '../../models/user/user.model'
-
+import User from '../../models/user/user.model';
 
 const getAllUsers = async () => {
   try {
-    const users = await User.find()
+    const users = await User.find();
     return users;
   } catch (error) {
     console.error("Error retrieving users:", error);
@@ -14,7 +13,6 @@ const getAllUsers = async () => {
 
 const createUser = async (userData) => {
   try {
-    // Verificar que el nombre de usuario y correo no esten en uso
     const users = await getAllUsers();
     users.forEach((usr) => {
       if (userData.username.toLowerCase() === usr.username) {
@@ -33,10 +31,10 @@ const createUser = async (userData) => {
       phone: userData.phone,
     });
 
-    const newUser = await user.save()
-    return newUser
+    const newUser = await user.save();
+    return newUser;
   } catch (error) {
-    if (error.message === "Username is already in use" || error.message === "Email is already in use") throw error
+    if (error.message === "Username is already in use" || error.message === "Email is already in use") throw error;
     else {
       console.error("Error trying to create user:", error);
       throw new Error("Error registering user to db");
@@ -73,11 +71,32 @@ const removeUser = async (userId) => {
       throw new Error("Error removing user from db");
     }
   }
-}
+};
+
+const loginUser = async (identifier, password) => {
+  try {
+    const user = await User.findOne({ $or: [{ username: identifier }, { email: identifier }] });
+    if (!user) {
+      throw new Error("Usuario no encontrado");
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      throw new Error("Contraseña incorrecta");
+    }
+
+    // Retornar el usuario si las credenciales son correctas
+    return user;
+  } catch (error) {
+    console.error("Error in login:", error);
+    throw new Error("Error during login process");
+  }
+};
 
 module.exports = {
   getAllUsers,
   createUser,
   removeUser,
   findUserById,
+  loginUser,
 };

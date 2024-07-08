@@ -2,31 +2,19 @@ import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-
-import ButtonLogin from '../../components/Login/ButtonLogin'
 import { useNavigation } from '@react-navigation/native';
-
+import ButtonLogin from '../../components/Login/ButtonLogin';
 
 export default function Login() {
     const navigation = useNavigation();
-    
-    const handleEnter =() =>{
-        const response = { status: 'OK' }
-        if (response.status === 'OK') {
 
-            navigation.navigate('Navigation'); 
-        } else {
-            console.log('Credenciales incorrectas');
-        }
-    };
-
-    const [username, setUsername] = useState("")
-    const [password, setPassword] = useState("")
+    const [identifier, setIdentifier] = useState("");
+    const [password, setPassword] = useState("");
 
     const loginData = {
-        username,
+        identifier,
         password
-    }
+    };
 
     return (
         <View style={styles.container}>
@@ -35,40 +23,34 @@ export default function Login() {
             <View style={styles.inputContainer}>
                 <MaterialCommunityIcons name="account" color="#9A9A9A" size={24} style={styles.inputIcon} />
                 <TextInput
-                    placeholder="Username"
+                    placeholder="Username or Email"
                     style={styles.textInput}
-                    value={username}
-                    onChangeText={text => setUsername(text)}
+                    value={identifier}
+                    onChangeText={text => setIdentifier(text)}
                 />
             </View>
             <View style={styles.inputContainer}>
-            <MaterialCommunityIcons name="lock" color="#9A9A9A" size={24} style={styles.inputIcon}/>
-            <TextInput
-                placeholder="Contraseña"
-                style={styles.textInput}
-                secureTextEntry={true}
-                value={password}
-                onChangeText={text => setPassword(text)}
-            />
+                <MaterialCommunityIcons name="lock" color="#9A9A9A" size={24} style={styles.inputIcon} />
+                <TextInput
+                    placeholder="Contraseña"
+                    style={styles.textInput}
+                    secureTextEntry={true}
+                    value={password}
+                    onChangeText={text => setPassword(text)}
+                />
             </View>
-            <TouchableOpacity onPress={handleEnter}>
-            <Text style={styles.links}>¿Olvidaste tu contraseña?</Text>
+            <TouchableOpacity>
+                <Text style={styles.links}>¿Olvidaste tu contraseña?</Text>
             </TouchableOpacity>
-            <ButtonLogin data={loginData}/>
-            <TouchableOpacity 
-                onPress={()=>{
-                    navigation.navigate('Signup'); 
-                }}>
-            <Text style={styles.footerText}>¿Aún no tienes cuenta? <Text style={styles.links}>Registrate</Text></Text>
+            <ButtonLogin data={loginData} />
+            <TouchableOpacity onPress={() => { navigation.navigate('Signup'); }}>
+                <Text style={styles.footerText}>¿Aún no tienes cuenta? <Text style={styles.links}>Registrate</Text></Text>
             </TouchableOpacity>
-    
 
             <StatusBar style="auto" />
         </View>
     );
 }
-
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -84,21 +66,17 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         alignItems: "center",
     },
-    buttonContainer: {
-        alignItems: "center",
-    },
     title: {
         textAlign: 'center',
         fontSize: 60,
         fontWeight: 'bold',
-        color: '#5DADE2 ',
+        color: '#5DADE2',
     },
     subtitle: {
         fontSize: 20,
         textAlign: 'center',
         color: '#2C3E50',
         marginBottom: 20,
-
     },
     textInput: {
         padding: 10,
@@ -116,7 +94,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginRight: 40,
     },
-    footerText:{
+    footerText: {
         color: '#2C3E50',
         textAlign: 'center',
         fontSize: 15,

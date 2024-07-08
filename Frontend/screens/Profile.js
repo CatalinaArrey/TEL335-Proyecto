@@ -1,18 +1,22 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import UserIntro from '../components/Profile/UserIntro';
+import MenuInfo from '../components/Profile/MenuInfo';
 
 const Profile = () => {
+  const handleEditProfile = () => {
+       Alert.alert('Editar Perfil', 'Implementa la funcionalidad de edición aquí.');
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Perfil</Text>
-
       {/* UserInfo */}
       <UserIntro/>
       
       {/* Menu Info */}
-
-
+      <MenuInfo onEditProfile={handleEditProfile} />
+      
+      <Text style={styles.footerText}>Desarrollado por PetSociety © 2024</Text>
     </View>
   );
 };
@@ -20,11 +24,14 @@ const Profile = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding:20,
+    padding: 20,
+    paddingTop: 40,
   },
-  header: {
-    fontSize: 35,
-    fontWeight: 'bold',
+  footerText: {
+    marginTop: 20,
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center'
   },
 });
 

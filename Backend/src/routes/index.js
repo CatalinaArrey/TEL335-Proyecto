@@ -9,7 +9,6 @@ const router = new Router()
 
 router.get('/health', getHealth)
 
-
 router.post("/user", user.register);
 router.get("/users", user.getUsers);
 router.get("/user", auth.authenticateToken, user.getUserById);

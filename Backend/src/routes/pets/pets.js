@@ -16,7 +16,7 @@ exports.register = async (ctx) => {
     };
     ctx.status = 201;
     return ctx;
-  } catch {
+  } catch (error) {
     if ( error.message === "Invalid parameter: name") {
       ctx.body = {
         status: "NOK",

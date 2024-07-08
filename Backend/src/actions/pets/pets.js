@@ -1,6 +1,6 @@
 import userActions from '../user/user'
-import Pet from '../../models/pets/pet.model'
-import User from '../../models/user/user.model'
+const User = require('../../models/user/user.model');
+const Pet = require('../../models/pets/pet.model');
 
 
 const createPet = async (petData, ownerId) => {
@@ -40,13 +40,12 @@ const listPetsByUser = async (ownerId) => {
     pets = user.pets
     return pets
   } catch (error) {
-    if (error.message === "User not found") throw error;
-    else {
-      console.error("Error searching for pets:", error);
-      throw new Error("Error searching for pets in db");
-    }
+    console.error("Error searching for pets: ", error);
+    ctx.status = 500;
+    ctx.body = { error: "Failed to fetch pets. Internal server error." };
   }
-}
+};
+
 
 const removePet = async (petId) => {
   try {
