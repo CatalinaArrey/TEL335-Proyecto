@@ -13,35 +13,35 @@ const Calendarios = () => {
 
   const [citasMascotas, setCitasMascotas] = useState([]);
   let shouldUpdate = 1
-  // useEffect(() => {
+  useEffect(() => {
     
-  //   const fetchDates = async () => {
-  //     try {
-  //       if(shouldUpdate){
-  //         const accessToken = await AsyncStorage.getItem("accessToken");
-  //         const response = await axiosInstance.get("/appointments", {
-  //           headers: {
-  //             Authorization: `Bearer ${accessToken}`,
-  //           },
-  //         });
+    const fetchDates = async () => {
+      try {
+        if(shouldUpdate){
+          const accessToken = await AsyncStorage.getItem("accessToken");
+          const response = await axiosInstance.get("/appointments", {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
 
-  //         if (response.status === 200) {
-  //           const { appointments } = response.data;
-  //           console.log("Citas obtenidas:", appointments);
-  //           setCitasMascotas(appointments);
-  //           shouldUpdate = 0;
-  //         } else {
-  //           console.error("Respuesta inesperada: ", response);
-  //         }
+          if (response.status === 200) {
+            const { appointments } = response.data;
+            console.log("Citas obtenidas:", appointments);
+            setCitasMascotas(appointments);
+            shouldUpdate = 0;
+          } else {
+            console.error("Respuesta inesperada: ", response);
+          }
             
-  //       }
-  //     } catch (error) {
-  //       console.error("Error al obtener citas: ", error);
-  //     }
-  //   };
+        }
+      } catch (error) {
+        console.error("Error al obtener citas: ", error);
+      }
+    };
 
-  //     fetchDates();
-  //   }, );
+      fetchDates();
+    }, [shouldUpdate]);
 
   const [filtroMascota, setFiltroMascota] = useState('todas');
   const [selectedDate, setSelectedDate] = useState(null);

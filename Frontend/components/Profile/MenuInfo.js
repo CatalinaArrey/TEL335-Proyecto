@@ -2,12 +2,14 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import axiosInstance from '../AxiosInstance';
+import { useNavigation } from "@react-navigation/native";
 
-const MenuInfo = ({ onEditProfile, navigation }) => {
+const MenuInfo = ({ onEditProfile}) => {
+  const navigation = useNavigation()
     const handleLogout = async () => {
         try {
           const response = await axiosInstance.post('/auth/logout');
-          if (response.status === 200) {
+          if (response.status === 204) {
             navigation.navigate('Login'); 
           } else {
             throw new Error('Error al cerrar sesión');
