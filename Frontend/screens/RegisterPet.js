@@ -6,6 +6,7 @@ import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import axios from "axios";
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import ButtonRegister from '../components/Register/ButtonRegister';
 import Calendario from '../components/CalendarPicker';
@@ -18,7 +19,7 @@ const speciesOptions = [
     { label: 'Otro', value: 'Otro', icon: 'help-circle', razas: [] },
 ];
 
-const RegisterPet = ({ userId }) => {
+const RegisterPet = () => {
     const navigation = useNavigation();
     const [petName, setPetName] = useState('');
     const [petNameVerify, setPetNameVerify] = useState(false);
@@ -73,10 +74,18 @@ const RegisterPet = ({ userId }) => {
                 birthday: cumpleanos,
                 image: image, // Pasar Imagen, por ahora no está guardada
             };
-            console.log("petdata:",petData,userId);
-            const response = await axios.post("http://192.168.1.89:3000/pets/${userId}", petData);
+            const accessToken = await AsyncStorage.getItem('accessToken')
+            console.log("petdata:",petData);
+            const response = await axios.post(
+              "http://192.168.1.108:3000/pet",
+              petData, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+              }
+            );
 
-            if (response.status === 200) {
+            if (response.status === 201) {
                 console.log("Pet registration successful:", response.data);
                 onSuccess(); // Llama a la función onSuccess después de un registro exitoso
             } else {
