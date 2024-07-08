@@ -2,20 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Pets = () => {
     const navigation = useNavigation();
     const [pets, setPets] = useState([]);
     const [selectedPet, setSelectedPet] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [accessToken, setAccessToken] = useState(null);
 
     useEffect(() => {
         const fetchPets = async () => {
             try {
-                const response = await axios.get('/pets', {
+                const accessToken = await AsyncStorage.getItem("accessToken");
+                const response = await axios.get('http://192.168.1.108:3000/pets', {
                     headers: {
-                        Authorization: `Bearer ${accessToken}`
+                        'Authorization': `Bearer ${accessToken}`
                     }
                 });
 
@@ -31,10 +32,8 @@ const Pets = () => {
             }
         };
 
-        if (accessToken) {
-            fetchPets();
-        }
-    }, [accessToken]);
+        fetchPets()
+    }, []);
 
     const handleRegisterPet = () => {
         navigation.navigate("RegisterPet");

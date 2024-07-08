@@ -5,7 +5,7 @@ import axios from 'axios';
 const MenuInfo = ({ onEditProfile, navigation }) => {
     const handleLogout = async () => {
         try {
-          const response = await axios.post(`http://192.168.1.89:3000/auth/logout`);
+          const response = await axios.post(`http://192.168.1.108:3000/auth/logout`);
           if (response.status === 200) {
             navigation.navigate('Login'); 
           } else {

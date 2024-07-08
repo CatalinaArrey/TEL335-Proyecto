@@ -15,6 +15,7 @@ exports.authenticateToken = async (ctx, next) => {
     ctx.state.user = user;
     await next();
   } catch (err) {
+    console.error(err)
     ctx.status = 403;
     return ctx;
   }

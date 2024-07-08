@@ -47,7 +47,7 @@ exports.getPetsByUser = async (ctx) => {
   try {
     const userId = ctx.state.user.id;
     const pets = await petActions.listPetsByUser(userId);
-    if (!user) throw new Error("Pets not found");
+    if (!pets) throw new Error("Pets not found");
 
     ctx.body = {
       status: "OK",
