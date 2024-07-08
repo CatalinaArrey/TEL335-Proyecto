@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  phone: String,
+  phone: {type: String, default: ""},
   pets: { type: [{type: mongoose.SchemaTypes.ObjectId, ref: 'Pet'}], default: [] }
 });
 

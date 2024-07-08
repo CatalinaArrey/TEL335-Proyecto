@@ -9,8 +9,8 @@ const appointmentSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  place: String,
-  description: String,
+  place: { type: String, default: "" },
+  description: { type: String, default: "" },
 });
 
 module.exports = mongoose.model("Appointment", appointmentSchema);

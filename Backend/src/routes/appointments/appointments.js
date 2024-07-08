@@ -35,11 +35,11 @@ exports.getAppointmentsByPet = async (ctx) => {
 exports.createAppointment = async (ctx) => {
   try {
     const petId = ctx.params.petId
-    const { date, title, place, desc } = ctx.request.body;
+    const { date, title, place, description } = ctx.request.body;
     if (!date) throw new Error("Invalid parameter: date");
     if (!title) throw new Error("Invalid parameter: title");
 
-    const appt = { date, title, place, desc };
+    const appt = { date, title, place, description };
     const newAppt = await apptActions.scheduleAppointment(appt, petId);
 
     ctx.body = {
@@ -73,43 +73,13 @@ exports.createAppointment = async (ctx) => {
   }
 }
 
-exports.updateAppointment = (ctx) => {
+exports.updateAppointment = async (ctx) => {
   try {
-    const { date, title, place, desc } = ctx.request.body
+    const { date, title, place, description } = ctx.request.body;
+    const apptId = ctx.params.appointmentId
 
-    const apptId = Number(ctx.params.appointmentId);
-    const data = ctx.request.body;
-
-    let error = 0;
-    let error_msg = "";
-
-    // params.forEach((key) => {
-    //   let value = data[key];
-
-    //   if (value === undefined || value.length === 0) {
-    //     error_msg = `Invalid ${key}`;
-    //     error = 1;
-    //     return;
-    //   }
-    // });
-
-    // optionalParams.forEach((key) => {
-    //   let value = data[key];
-    //   if (value === undefined || value === null) {
-    //     data[key] = "";
-    //   }
-    // });
-
-    if (error) {
-      ctx.body = {
-        status: "NOK",
-        error_msg,
-      };
-      ctx.status = 400;
-      return ctx;
-    }
-
-    let updatedAppt = apptActions.changeAppointment(data, apptId);
+    const appt = { date, title, place, description };
+    const updatedAppt = await apptActions.changeAppointment(appt, apptId);
 
     ctx.body = {
       status: "OK",
@@ -119,12 +89,21 @@ exports.updateAppointment = (ctx) => {
     return ctx;
 
   } catch {
-    ctx.body = {
-      status: "NOK",
-      error_msg: "INTERNAL SERVER ERROR",
-    };
-    ctx.status = 500;
+    if (error.message.includes("not found")) {
+      ctx.status = 404;
+      ctx.body = {
+        status: "NOK",
+        msg: error.message,
+      };
+    } else {
+      console.error(error);
 
+      ctx.body = {
+        status: "NOK",
+        error_msg: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
     return ctx;
   }
 }

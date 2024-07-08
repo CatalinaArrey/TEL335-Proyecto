@@ -5,11 +5,11 @@ const petSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  species: String,
-  breed: String,
-  birthday: Date,
+  species: { type: String, default: "" },
+  breed: { type: String, default: "" },
+  birthday: String,
   appointments: {
-    type: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Appointment' }],
+    type: [{ type: mongoose.SchemaTypes.ObjectId, ref: "Appointment" }],
     default: [],
   },
 });
