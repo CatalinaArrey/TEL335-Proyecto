@@ -10,16 +10,13 @@ const generateAccessToken = (user) => {
   return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30m' });
 };
 
-const generateRefreshToken = (user) => {
-  const token = jwt.sign(
-    { id: user.id, username: user.username },
-    process.env.REFRESH_TOKEN_SECRET
-  );
+const generateRefreshToken = async (user) => {
+  const token = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
   const refreshToken = new Token({
     token,
     userId: user.id,
   });
-  refreshToken.save();
+  await refreshToken.save();
   return token
 }
 
@@ -56,7 +53,7 @@ exports.loginUser = async (data) => {
       id: user._id,
       username: user.username,
     });
-    const refreshToken = generateRefreshToken({
+    const refreshToken = await generateRefreshToken({
       id: user._id,
       username: user.username,
     });
