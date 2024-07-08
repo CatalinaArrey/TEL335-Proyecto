@@ -2,15 +2,14 @@ import React, { useState } from 'react';
 import { StatusBar, Alert } from 'react-native';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { Picker } from '@react-native-picker/picker';
-import * as ImagePicker from 'expo-image-picker';
+import RNPickerSelect from 'react-native-picker-select';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import ButtonRegister from '../components/Register/ButtonRegister';
 import Calendario from '../components/CalendarPicker';
 import axiosInstance from '../components/AxiosInstance';
-import { usePets } from '../components/Pets/PetsContext'
+import { usePets } from '../components/Pets/PetsContext';
 
 const speciesOptions = [
     { label: 'Perro', value: 'perro', icon: 'dog', razas: ['Labrador', 'Poodle', 'Bulldog', 'Pastor Alemán', 'Akita', 'Quiltro'] },
@@ -46,11 +45,6 @@ const RegisterPet = () => {
     const handleConfirmDate = (date) => {
         setCumpleanos(date);
         hideDatePickerHandler();
-    };
-
-    const onSuccess = () => {
-        Alert.alert("Success", "Pet created successfully!");
-        navigation.navigate("Navigation");
     };
 
     const handleRegisterPet = async () => {
@@ -117,23 +111,29 @@ const RegisterPet = () => {
 
             <View style={styles.inputContainer}>
                 <MaterialCommunityIcons name={speciesOptions.find(option => option.value === especie)?.icon || 'paw'} color="#9A9A9A" size={24} style={styles.inputIcon} />
-                <Picker
-                    selectedValue={especie}
-                    style={styles.textInput}
-                    onValueChange={(itemValue, itemIndex) => {
+                <RNPickerSelect
+                    onValueChange={(itemValue) => {
                         setEspecie(itemValue);
                         setRaza("");
                     }}
-                >
-                    <Picker.Item label="Selecciona especie" value="" />
-                    {speciesOptions.map((option) => (
-                        <Picker.Item
-                            key={option.value}
-                            label={option.label}
-                            value={option.value}
-                        />
-                    ))}
-                </Picker>
+                    items={speciesOptions.map((option) => ({
+                        label: option.label,
+                        value: option.value,
+                        key: option.value,
+                    }))}
+                    placeholder={{ label: 'Selecciona especie', value: '' }}
+                    value={especie}
+                    style={{
+                        inputAndroid: {
+                            ...styles.textInput,
+                            width: '100%',
+                        },
+                        inputIOS: {
+                            ...styles.textInput,
+                            width: '100%',
+                        },
+                    }}
+                />
             </View>
 
             <View style={styles.inputContainer}>
@@ -146,16 +146,26 @@ const RegisterPet = () => {
                         onChangeText={text => setRaza(text)}
                     />
                 ) : (
-                    <Picker
-                        selectedValue={raza}
-                        style={styles.textInput}
-                        onValueChange={(itemValue, itemIndex) => setRaza(itemValue)}
-                    >
-                        <Picker.Item label="Selecciona raza" value="" />
-                        {speciesOptions.find(option => option.value === especie)?.razas.map((raza) => (
-                            <Picker.Item key={raza} label={raza} value={raza} />
-                        ))}
-                    </Picker>
+                    <RNPickerSelect
+                        onValueChange={(itemValue) => setRaza(itemValue)}
+                        items={(speciesOptions.find(option => option.value === especie)?.razas || []).map((raza) => ({
+                            label: raza,
+                            value: raza,
+                            key: raza,
+                        }))}
+                        placeholder={{ label: 'Selecciona raza', value: '' }}
+                        value={raza}
+                        style={{
+                            inputAndroid: {
+                                ...styles.textInput,
+                                width: '100%',
+                            },
+                            inputIOS: {
+                                ...styles.textInput,
+                                width: '100%',
+                            },
+                        }}
+                    />
                 )}
             </View>
 
