@@ -18,7 +18,7 @@ const speciesOptions = [
     { label: 'Otro', value: 'Otro', icon: 'help-circle', razas: [] },
 ];
 
-const RegisterPet = () => {
+const RegisterPet = ({ userId }) => {
     const navigation = useNavigation();
     const [petName, setPetName] = useState('');
     const [petNameVerify, setPetNameVerify] = useState(false);
@@ -71,10 +71,10 @@ const RegisterPet = () => {
                 species: especie,
                 breed: raza,
                 birthday: cumpleanos,
-                image: image, // Asegúrate de enviar la imagen correctamente
+                image: image, // Pasar Imagen, por ahora no está guardada
             };
-
-            const response = await axios.post("http://192.168.1.89:3000/pets", petData);
+            console.log("petdata:",petData,userId);
+            const response = await axios.post("http://192.168.1.89:3000/pets/${userId}", petData);
 
             if (response.status === 200) {
                 console.log("Pet registration successful:", response.data);

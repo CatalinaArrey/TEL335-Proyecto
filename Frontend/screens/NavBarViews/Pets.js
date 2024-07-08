@@ -1,30 +1,64 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, ScrollView, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
+import axiosInstance from "../AxiosInstance";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Pets = () => {
   const navigation = useNavigation();
   const [pets, setPets] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    fetchPets();
+    const fetchUserId = async () => {
+      try {
+        const userIdFromStorage = await AsyncStorage.getItem('userId');
+        if (userIdFromStorage) {
+          setUserId(userIdFromStorage);
+        } else {
+          console.error("No userId found in AsyncStorage");
+          Alert.alert("Error", "User ID not found. Please login again.");
+        }
+      } catch (error) {
+        console.error("Error fetching userId from AsyncStorage: ", error);
+        Alert.alert("Error", "Failed to fetch user ID. Please try again later.");
+      }
+    };
+
+    fetchUserId();
   }, []);
+
+  useEffect(() => {
+    if (userId) {
+      fetchPets();
+    }
+  }, [userId]);
 
   const fetchPets = async () => {
     try {
-      const response = await axios.get("http://192.168.1.89:3000/pets/:userId"); // Reemplaza :userId con el ID del usuario actual
+      const response = await axiosInstance.get(`/pets`);
       if (response.status === 200) {
-        setPets(response.data.pets); // Asegúrate de que `response.data.pets` sea la estructura correcta de tus datos
+        const { pets } = response.data;
+        console.log("Mascotas obtenidas:", pets);
+        setPets(pets);
       } else {
         console.error("Unexpected response: ", response);
         Alert.alert("Error", "Unexpected response from server. Please try again.");
       }
     } catch (error) {
       console.error("Error fetching pets: ", error);
-      Alert.alert("Error", "Failed to fetch pets. Please check your network connection.");
+      if (error.response) {
+        console.error("Server error response: ", error.response.data);
+        Alert.alert("Error", "Failed to fetch pets. Server error. Please try again later.");
+      } else if (error.request) {
+        console.error("Request error: ", error.request);
+        Alert.alert("Error", "Failed to fetch pets. No response from server. Please check your network connection.");
+      } else {
+        console.error("Request setup error: ", error.message);
+        Alert.alert("Error", "Failed to fetch pets. Request setup error. Please try again.");
+      }
     }
   };
 

@@ -3,6 +3,8 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 import ButtonRegister from '../../components/Register/ButtonRegister';
 
@@ -23,8 +25,10 @@ export default function Register() {
     const [phoneVerify, setPhoneVerify] = useState(false);
     const [showPass, setShowPass] = useState(false);
 
-    const onSuccess = () => {
+    const onSuccess = async() => {
         Alert.alert("Success", "User created successfully!");
+        await AsyncStorage.setItem('token', response.data.token);
+        await AsyncStorage.setItem('username', username);
         navigation.navigate("RegisterPet");
     };
 
@@ -39,7 +43,7 @@ export default function Register() {
         
             const response = await axios.post("http://192.168.1.89:3000/user", userData);
 
-            if (response.status === 200) {
+            if (response.status === 201) {
                 console.log("Pet registration successful:", response.data);
                 onSuccess(); 
             } else {
