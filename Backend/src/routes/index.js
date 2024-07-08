@@ -23,7 +23,8 @@ router.get("/pets", auth.authenticateToken, pets.getPetsByUser);
 router.get("/pet/:petId", pets.getPetById);
 router.delete("/pet/:petId", pets.deletePet);
 
-router.post("/appointment/:petId", appointments.createAppointment)
+router.post("/appointment", appointments.createAppointment)
+router.get("/appointments", auth.authenticateToken, appointments.getAppointmentsByUser);
 router.get("/appointments/:petId", appointments.getAppointmentsByPet);
 router.get("/appointment/:appointmentId", appointments.getAppointmentById);
 router.put("/appointment/:appointmentId", appointments.updateAppointment)

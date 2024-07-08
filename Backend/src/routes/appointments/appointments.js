@@ -34,13 +34,12 @@ exports.getAppointmentsByPet = async (ctx) => {
 
 exports.createAppointment = async (ctx) => {
   try {
-    const petId = ctx.params.petId
-    const { date, title, place, description } = ctx.request.body;
+    const { date, title, place, description, petName } = ctx.request.body;
     if (!date) throw new Error("Invalid parameter: date");
     if (!title) throw new Error("Invalid parameter: title");
 
-    const appt = { date, title, place, description };
-    const newAppt = await apptActions.scheduleAppointment(appt, petId);
+    const appt = { date, title, place, description, petName };
+    const newAppt = await apptActions.scheduleAppointment(appt);
 
     ctx.body = {
       status: "OK",
@@ -63,6 +62,7 @@ exports.createAppointment = async (ctx) => {
       };
       ctx.status = 404;
     } else {
+      console.error(error)
       ctx.body = {
         status: "NOK",
         error_msg: "INTERNAL SERVER ERROR",
@@ -160,6 +160,35 @@ exports.getAppointmentById = async (ctx) => {
     } else {
       console.error(error);
 
+      ctx.body = {
+        status: "NOK",
+        error_msg: "INTERNAL SERVER ERROR",
+      };
+      ctx.status = 500;
+    }
+    return ctx;
+  }
+};
+exports.getAppointmentsByUser = async (ctx) => {
+  try {
+    const userId = ctx.state.user.id;
+    const appointments = await apptActions.listAppointmentsByUser(userId);
+    if (!appointments) throw new Error("Appointments not found");
+
+    ctx.body = {
+      status: "OK",
+      appointments,
+    };
+    ctx.status = 200;
+    return ctx;
+  } catch {
+    if (error.message.includes("not found")) {
+      ctx.body = {
+        status: "NOK",
+        error_msg: error.message,
+      };
+      ctx.status = 404;
+    } else {
       ctx.body = {
         status: "NOK",
         error_msg: "INTERNAL SERVER ERROR",

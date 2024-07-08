@@ -10,7 +10,6 @@ exports.authenticateToken = async (ctx, next) => {
       ctx.status = 401;
       return ctx;
     }
-
     const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     ctx.state.user = user;
     await next();

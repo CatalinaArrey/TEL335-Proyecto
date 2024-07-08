@@ -1,6 +1,7 @@
 import petActions from '../pets/pets'
 import Appointment from '../../models/appointments/appointment.model'
 import Pet from "../../models/pets/pet.model";
+import User from "../../models/user/user.model"
 
 const listAppointmentsByPet = async (petId) => {
   try {
@@ -20,7 +21,9 @@ const listAppointmentsByPet = async (petId) => {
 
 const scheduleAppointment = async (apptData, petId) => {
   try {
-    const pet = await petActions.findPetById(petId);
+
+    console.log(apptData.petName);
+    const pet = await Pet.findOne({name: apptData.petName});
     if (!pet) throw new Error("Pet not found");
 
     
@@ -111,10 +114,45 @@ const findAppointmentById = async (apptId) => {
   }
 };
 
+const listAppointmentsByUser = async (ownerId) => {
+  try {
+    let pets;
+    if (!ownerId.match(/^[0-9a-fA-F]{24}$/)) throw new Error("User not found");
+
+    const user = await User.findById(ownerId).populate("pets").exec();
+    if (!user) throw new Error("User not found");
+    pets = user.pets;
+    if (!pets) throw new Error("Pets not found");
+    let appts = []
+
+for (const pet of pets) {
+  const petFull = await Pet.findById(pet._id).populate("appointments").exec();
+  const petAppts = petFull.appointments;
+  console.log(petAppts);
+  if (petAppts.length > 0) {
+    console.log("yes");
+    petAppts.forEach((appt) => {
+      console.log(appt);
+      appts.push(appt);
+    });
+  }
+}
+
+      console.log(appts);
+
+    return appts;
+  } catch (error) {
+    console.error("Error searching for appointments: ", error);
+    throw new Error("Error searching for appointments")
+  }
+};
+
+
 module.exports = {
   listAppointmentsByPet,
   scheduleAppointment,
   changeAppointment,
   removeAppointment,
   findAppointmentById,
+  listAppointmentsByUser,
 };

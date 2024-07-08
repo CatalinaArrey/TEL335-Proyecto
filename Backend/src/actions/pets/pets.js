@@ -41,8 +41,7 @@ const listPetsByUser = async (ownerId) => {
     return pets
   } catch (error) {
     console.error("Error searching for pets: ", error);
-    ctx.status = 500;
-    ctx.body = { error: "Failed to fetch pets. Internal server error." };
+    throw new Error("Error searching for pets in db");
   }
 };
 

@@ -1,19 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Alert, TouchableOpacity } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { format } from 'date-fns';
 import esLocale from 'date-fns/locale/es';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axiosInstance from '../../components/AxiosInstance';
 
 const Calendarios = () => {
   const navigation = useNavigation();
 
-  const [citasMascotas, setCitasMascotas] = useState([
-    { id: 1, date: '2024-07-10', color: '#3498db', title: 'Cita Azul', place: 'Lugar Azul', desc: 'Descripción Azul', petId: 1 },
-    { id: 2, date: '2024-07-15', color: '#2ecc71', title: 'Cita Verde', place: 'Lugar Verde', desc: 'Descripción Verde', petId: 2 },
-    { id: 3, date: '2024-07-20', color: '#e74c3c', title: 'Cita Roja', place: 'Lugar Rojo', desc: 'Descripción Roja', petId: 3 },
-  ]);
+  const [citasMascotas, setCitasMascotas] = useState([]);
+  const shouldUpdate = 1
+  useEffect(() => {
+    
+    const fetchDates = async () => {
+      try {
+        if(shouldUpdate){
+        const accessToken = await AsyncStorage.getItem("accessToken");
+        const response = await axiosInstance.get("/appointments", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (response.status === 200) {
+          const { appointments } = response.data;
+          console.log("Citas obtenidas:", appointments);
+          setCitasMascotas(appointments);
+          shouldUpdate = 0;
+        } else {
+          console.error("Respuesta inesperada: ", response);
+        }
+          
+        }
+      } catch (error) {
+        console.error("Error al obtener citas: ", error);
+      }
+    };
+
+      fetchDates();
+    }, );
 
   const [filtroMascota, setFiltroMascota] = useState('todas');
   const [selectedDate, setSelectedDate] = useState(null);

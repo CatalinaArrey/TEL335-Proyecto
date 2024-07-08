@@ -61,7 +61,7 @@ const Pets = () => {
 
     const renderPetList = () => {
         return pets.map((pet) => (
-            <TouchableOpacity key={pet.id} style={styles.petContainer} onPress={() => showPetDetails(pet)}>
+            <TouchableOpacity key={pet._id} style={styles.petContainer} onPress={() => showPetDetails(pet)}>
                 <MaterialCommunityIcons 
                     name={speciesIcons[pet.species] || 'help-circle'} 
                     size={50} 

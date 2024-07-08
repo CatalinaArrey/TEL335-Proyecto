@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import axiosInstance from '../../components/AxiosInstance';
+import { Alert } from 'react-native';
 
 
 const NewDate = () => {
@@ -8,12 +10,43 @@ const NewDate = () => {
   const [date, setDate] = useState('');
   const [place, setPlace] = useState('');
   const [desc, setDesc] = useState('');
+  const [petName, setPetName] = useState("");
 
-  const handleSaveAppointment = () => {
+  const handleSaveAppointment = async () => {
     // Validar que todos los campos estén llenos antes de guardar
-    if (title && date && place && desc) {
-      // Aquí puedes llamar a la función para programar la cita
-      const newAppointment = scheduleAppointment({ title, date, place, desc }, petId);
+    if (title && date && petName) {
+      try {
+        // Aquí puedes llamar a la función para programar la cita
+        const newAppointment ={ title, date, place, description: desc, petName };
+        console.log(newAppointment)
+        const response = await axiosInstance.post(
+          "/appointment",
+          newAppointment
+        );
+        if (response.status === 201) {
+          Alert.alert("Cita registrada exitosamente");
+          navigation.goBack();
+        } else {
+          console.error("Unexpected response:", response);
+          Alert.alert(
+            "Error",
+            "Unexpected response from server. Please try again."
+          );
+        }
+      } catch (error) {
+            console.error("Error sending data:", error);
+            if (error.response) {
+                console.error("Error response data:", error.response.data);
+                Alert.alert("Error", `Server responded with status code ${error.response.status}: ${error.response.data.error_msg || 'Unknown error'}`);
+            } else if (error.request) {
+                console.error("Error request:", error.request);
+                Alert.alert("Error", "No response from server. Please check your network connection.");
+            } else {
+                console.error("Error message:", error.message);
+                Alert.alert("Error", `Error in request setup: ${error.message}`);
+            }
+        }
+
       
       // Lógica adicional después de guardar, como navegar a otra pantalla o mostrar un mensaje de éxito
     } else {
@@ -25,9 +58,14 @@ const NewDate = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Nueva Cita</Text>
-      
+
       <View style={styles.inputContainer}>
-        <MaterialCommunityIcons name="calendar-clock" color="#9A9A9A" size={24} style={styles.inputIcon} />
+        <MaterialCommunityIcons
+          name="calendar-clock"
+          color="#9A9A9A"
+          size={24}
+          style={styles.inputIcon}
+        />
         <TextInput
           placeholder="Título"
           style={styles.textInput}
@@ -37,7 +75,12 @@ const NewDate = () => {
       </View>
 
       <View style={styles.inputContainer}>
-        <MaterialCommunityIcons name="calendar" color="#9A9A9A" size={24} style={styles.inputIcon} />
+        <MaterialCommunityIcons
+          name="calendar"
+          color="#9A9A9A"
+          size={24}
+          style={styles.inputIcon}
+        />
         <TextInput
           placeholder="Fecha (YYYY-MM-DD)"
           style={styles.textInput}
@@ -47,7 +90,12 @@ const NewDate = () => {
       </View>
 
       <View style={styles.inputContainer}>
-        <MaterialCommunityIcons name="map-marker" color="#9A9A9A" size={24} style={styles.inputIcon} />
+        <MaterialCommunityIcons
+          name="map-marker"
+          color="#9A9A9A"
+          size={24}
+          style={styles.inputIcon}
+        />
         <TextInput
           placeholder="Lugar"
           style={styles.textInput}
@@ -57,7 +105,12 @@ const NewDate = () => {
       </View>
 
       <View style={styles.inputContainer}>
-        <MaterialCommunityIcons name="note-text" color="#9A9A9A" size={24} style={styles.inputIcon} />
+        <MaterialCommunityIcons
+          name="note-text"
+          color="#9A9A9A"
+          size={24}
+          style={styles.inputIcon}
+        />
         <TextInput
           placeholder="Descripción"
           style={styles.textInput}
@@ -66,7 +119,25 @@ const NewDate = () => {
         />
       </View>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSaveAppointment}>
+      <View style={styles.inputContainer}>
+        <MaterialCommunityIcons
+          name="cat"
+          color="#9A9A9A"
+          size={24}
+          style={styles.inputIcon}
+        />
+        <TextInput
+          placeholder="Mascota"
+          style={styles.textInput}
+          value={petName}
+          onChangeText={setPetName}
+        />
+      </View>
+
+      <TouchableOpacity
+        style={styles.saveButton}
+        onPress={handleSaveAppointment}
+      >
         <Text style={styles.buttonText}>Guardar Cita</Text>
       </TouchableOpacity>
     </View>
